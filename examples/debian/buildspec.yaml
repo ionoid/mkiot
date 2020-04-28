@@ -1,0 +1,57 @@
+version: 0.1
+
+arch: armhf
+
+phases:
+        installs:
+                - image: debian
+                  mirror: http://deb.debian.org/debian/
+                  release: stretch
+                  name: debian-armhf-dev
+                  base-directory: build/
+                  install-args:
+                  runtime-versions:
+                  commands:
+                        - echo "Installed debian stretch"
+                        - copy dir targetdir
+                        - cat /etc/os-release
+                        - echo "OS release file output above"
+                        - copy file targetfile
+
+                - image: debian
+                  mirror: http://deb.debian.org/debian/
+                  release: stretch
+                  name: debian-armhf-prod
+                  base-directory: build/
+                  install-args:
+
+
+        pre-builds:
+                # Set what image to use from installs
+                - use: debian-armhf-dev
+                  commands:
+                        - echo "Build programs started"
+
+        builds:
+                # Set what image to use from installs
+                - use: debian-armhf-dev
+                  commands:
+                        - echo "Build stage and programs"
+
+                # Use debian-armhf-prod image as target
+                - use: debian-armhf-prod
+                  commands:
+                        # copy from dev image to prod image
+                        - copy --from=debian-armhf-dev src dest
+
+        post-builds:
+                - use: debian-armhf-prod
+                  commands:
+                        - echo "Build production finished"
+
+artifacts:
+        - name: hello-world-debian-armhf-$(date +%Y-%m-%d)
+          base-directory: build/
+          files:
+                - debian-armhf-prod/*
+          compression: tar

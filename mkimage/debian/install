@@ -1,0 +1,3 @@
+image="debian"
+mirror="http://deb.debian.org/debian/"
+release="stretch"

@@ -1,6 +1,7 @@
 version: 0.1
 
 arch: armhf
+base-directory: build/
 
 phases:
         installs:
@@ -8,21 +9,20 @@ phases:
                   mirror: http://deb.debian.org/debian/
                   release: stretch
                   name: debian-armhf-dev
-                  base-directory: build/
+                  cache: "reuse"
                   install-args:
                   runtime-versions:
                   commands:
                         - echo "Installed debian stretch"
-                        - copy dir targetdir
+                        - copy LICENSE /opt/
                         - cat /etc/os-release
                         - echo "OS release file output above"
-                        - copy file targetfile
 
                 - image: debian
                   mirror: http://deb.debian.org/debian/
                   release: stretch
                   name: debian-armhf-prod
-                  base-directory: build/
+                  cache: "reuse"
                   install-args:
 
 
@@ -31,18 +31,21 @@ phases:
                 - use: debian-armhf-dev
                   commands:
                         - echo "Build programs started"
+                        - cat /etc/os-release
 
         builds:
                 # Set what image to use from installs
                 - use: debian-armhf-dev
                   commands:
                         - echo "Build stage and programs"
+                        - cat /etc/os-release
 
                 # Use debian-armhf-prod image as target
                 - use: debian-armhf-prod
                   commands:
                         # copy from dev image to prod image
-                        - copy --from=debian-armhf-dev src dest
+                        - copy --from=debian-armhf-dev /opt/LICENSE /opt/
+                        - cat /etc/os-release
 
         post-builds:
                 - use: debian-armhf-prod
@@ -50,8 +53,8 @@ phases:
                         - echo "Build production finished"
 
 artifacts:
-        - name: hello-world-debian-armhf-$(date +%Y-%m-%d)
-          base-directory: build/
+        - name: debian-stretch-armhf
+          suffix: date +%Y-%m-%d
           files:
-                - debian-armhf-prod/*
+                - debian-armhf-prod
           compression: tar

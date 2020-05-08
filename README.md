@@ -27,6 +27,11 @@ version: 0.1
 arch: armhf
 base-directory: build/
 
+env:
+        variables:
+                key: "value"
+                key1: "value"
+
 phases:
         installs:
                 - image: debian
@@ -44,6 +49,7 @@ phases:
                   name: debian-armhf-prod
                   cache: "reuse"
                   install-args:
+                  shell: "bash"
 
 
         pre-builds:

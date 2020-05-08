@@ -7,11 +7,6 @@ mkiot="$(basename "$0")"
 
 set -e
 
-if [ "$(id -u)" -ne "0" ]; then
-        >&2 echo "Error: must be root"
-        exit 1
-fi
-
 if [ ! -r ./mkimage/build-helpers.bash ] ; then
         >&2 echo "Error: failed to load './mkimage/build-helpers.bash'"
         exit 1
@@ -90,6 +85,11 @@ if [ ! -f "$BUILDSPEC" ]; then
         usage
 fi
 
+if [ "$(id -u)" -ne "0" ]; then
+        >&2 echo "Error: must be root"
+        exit 1
+fi
+
 if [ -z "$ARCH" ]; then
         ARCH=$(get_yaml_value "$BUILDSPEC" "arch")
 fi
@@ -99,7 +99,7 @@ if [ -z "$BASE_DIRECTORY" ]; then
         export BASE_DIRECTORY="build/"
 fi
 
-if [ -z "$ARCH" ]; then
+if [ -z "$ARCH" ] || [ "$ARCH" == "null" ]; then
         fatal "'arch' architecture is not set"
 fi
 
@@ -112,7 +112,7 @@ if [ -z "$BASE_IMAGE" ]; then
         BASE_IMAGE=$(get_yaml_value "$BUILDSPEC" $(printf %s "phases.installs | .[0].image"))
 fi
 
-if [ -z "$BASE_IMAGE" ]; then
+if [ -z "$BASE_IMAGE" ] || [ "$BASE_IMAGE" == "null" ]; then
         error "image was not set"
         usage
 fi
@@ -154,21 +154,44 @@ export CHROOT_CONTAINER=$(which systemd-nspawn)
 
 time="$(date +%F_%H%M%S)"
 
+run_commands() {
+        export ROOTFS="$1"
+        local phase="$2"
+        local idx="$3"
+
+        # Walk now command instructions and run them
+        for comsidx in {0..40}
+        do
+                local cmd=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases${phase} | .[$idx].commands[$comsidx]")")
+                if [ "$cmd" == "null" ]; then
+                        break
+                fi
+
+                (
+                        set -x
+                        run_yaml_commands $cmd
+                )
+        done
+}
+
 run_phases_installs() {
         local idx="$1"
         local base_image="$2"
         shift 2
         local build_args="$@"
 
+        # Set default release mirror values
         . ./mkimage/$base_image/install
 
         export BASE_IMAGE_RELEASE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].release")")
         if [ -z $BASE_IMAGE_RELEASE ]; then
+                # Use default release
                 export BASE_IMAGE_RELEASE=$release
         fi
 
         export BASE_IMAGE_MIRROR=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].mirror")")
         if [ -z $BASE_IMAGE_MIRROR ]; then
+                # Use default mirror
                 export BASE_IMAGE_MIRROR=$mirror
         fi
 
@@ -177,13 +200,20 @@ run_phases_installs() {
         fi
 
         mkdir -p ${BASE_DIRECTORY}
+        chown ${user}.${user} ${BASE_DIRECTORY}
 
         export INSTALLS_NAME=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].name")")
         if [ -z "$INSTALLS_NAME" ]; then
                 export INSTALLS_NAME="install-$idx-output-$time"
         fi
 
-        info "Building with '$base_image' 'image=${BASE_DIRECTORY}/${INSTALLS_NAME}'"
+        local install_args=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx][\"install-args\"]")")
+        if [ "$install_args" == "null" ]; then
+                # clear them up
+                install_args=""
+        fi
+
+        info "phases.installs[$idx] OS '$base_image' into 'image=${BASE_DIRECTORY}/${INSTALLS_NAME}'"
 
         local reuse="false"
         local cache=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].cache")")
@@ -215,11 +245,11 @@ run_phases_installs() {
 
                 echo
                 info "Building with: 'buildspec=$BUILDSPEC' phases.installs[$idx] 'arch=$ARCH' 'image=$base_image' 'release=$BASE_IMAGE_RELEASE' \
-'base-directory=$BASE_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args=$args'"
+'base-directory=$BASE_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args=$install_args $build_args'"
 
                 # pass all remaining arguments to $script
                 if [ "$base_image" == "debian" ]; then
-                        "mkimage/debootstrap" --arch="$ARCH" "$build_args"
+                        "mkimage/debootstrap" --arch="$ARCH" "$install_args" "$build_args"
                 fi
         
                 #
@@ -231,40 +261,71 @@ run_phases_installs() {
         else
                 echo
                 info "Reusing image: phases.installs[$idx] 'arch=$ARCH' 'image=$base_image' 'release=$BASE_IMAGE_RELEASE' \
-'base-directory=$BASE_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args=$args'"
+'base-directory=$BASE_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args="
         fi
 
-        # Lets re-update $ROOTFS now
-        export ROOTFS="${BASE_DIRECTORY}/${INSTALLS_NAME}"
+        # Lets run commands from the installs phase
+        run_commands "${BASE_DIRECTORY}/${INSTALLS_NAME}" ".installs" "$idx"
 
-        # Walk now commands instructions
-        for comsidx in {0..20}
-        do
-                local cmd=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].commands[$comsidx]")")
-                if [ "$cmd" == "null" ]; then
-                        break
-                fi
-
-                (
-                        set -x
-                        run_yaml_commands $cmd
-                )
-        done
-
-        info "Building phases.installs[$idx] finished, image location: ${BASE_DIRECTORY}/$INSTALLS_NAME"
+        info "phases.installs[$idx] finished, image location: ${BASE_DIRECTORY}/$INSTALLS_NAME"
         echo
 }
 
 run_phases_pre_builds() {
-        info "Pre-builds phase" 
+        local idx="$1"
+        local use_image="$2"
+        shift 2
+
+        if [ -z $use_image ]; then
+                # Lets use last INSTALLS_NAME
+                use_image=$INSTALLS_NAME
+        fi
+
+        info "phases.pre-builds[$idx] started on 'image=${BASE_DIRECTORY}/${use_image}'"
+
+        # Lets run commands from the installs phase
+        run_commands "${BASE_DIRECTORY}/${use_image}" "[\"pre-builds\"]" "$idx"
+
+        info "phases.pre-builds[$idx] finished, image location: ${BASE_DIRECTORY}/${use_image}"
+        echo
 }
 
 run_phases_builds() {
-        info "Builds phase" 
+        local idx="$1"
+        local use_image="$2"
+        shift 2
+
+        if [ -z $use_image ]; then
+                # Lets use last INSTALLS_NAME
+                use_image=$INSTALLS_NAME
+        fi
+
+        info "phases.builds[$idx] started on 'image=${BASE_DIRECTORY}/${use_image}'"
+
+        # Lets run commands from the installs phase
+        run_commands "${BASE_DIRECTORY}/${use_image}" ".builds" "$idx"
+
+        info "phases.builds[$idx] finished, image location: ${BASE_DIRECTORY}/${use_image}"
+        echo
 }
 
 run_phases_post_builds() {
-        info "Post-builds phase" 
+        local idx="$1"
+        local use_image="$2"
+        shift 2
+
+        if [ -z $use_image ]; then
+                # Lets use last INSTALLS_NAME
+                use_image=$INSTALLS_NAME
+        fi
+
+        info "phases.post-builds[$idx] started on 'image=${BASE_DIRECTORY}/${use_image}'"
+
+        # Lets run commands from the installs phase
+        run_commands "${BASE_DIRECTORY}/${use_image}" "[\"post-builds\"]" "$idx"
+
+        info "phases.post-builds[$idx] finished, image location: ${BASE_DIRECTORY}/${use_image}"
+        echo
 }
 
 compress_artifact() {
@@ -341,8 +402,9 @@ generate_artifact() {
 
         local compression=$(get_yaml_value "$BUILDSPEC" "$(printf %s "artifacts | .[$idx].compression")")
 
-        compress_artifact ${ARTIFACTS_BASE_DIRECTORY} ${compression} $artifact
-        rm -fr $artifact
+        compress_artifact "${ARTIFACTS_BASE_DIRECTORY}" "${compression}" "${artifact}"
+
+        rm -fr "${ARTIFACTS_BASE_DIRECTORY}/${artifact}"
 }
 
 ## Lets start first phase "installs"
@@ -360,6 +422,48 @@ do
         else
                 fatal "Image '$BASE_IMAGE' is not supported"
         fi
+done
+
+## Lets run "pre-builds"
+echo
+info "Running phases pre-builds"
+for i in {0..4}
+do
+        USE_IMAGE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases[\"pre-builds\"] | .[$i].use")")
+        if [ "$USE_IMAGE" == "null" ]; then
+                break
+        fi
+
+        run_phases_pre_builds "$i" "$USE_IMAGE"
+        USE_IMAGE="null"
+done
+
+## Run "builds"
+echo
+info "Running phases builds"
+for i in {0..4}
+do
+        USE_IMAGE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.builds | .[$i].use")")
+        if [ "$USE_IMAGE" == "null" ]; then
+                break
+        fi
+
+        run_phases_builds "$i" "$USE_IMAGE"
+        USE_IMAGE="null"
+done
+
+## Run "post-builds"
+echo
+info "Running phases post-builds"
+for i in {0..4}
+do
+        USE_IMAGE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases[\"post-builds\"] | .[$i].use")")
+        if [ "$USE_IMAGE" == "null" ]; then
+                break
+        fi
+
+        run_phases_post_builds "$i" "$USE_IMAGE"
+        USE_IMAGE="null"
 done
 
 ## Last stage generate artifact

@@ -4,15 +4,16 @@
 # Copyright (C) 2020 Harouni Djalal <tixxdz@opendevices.io>
 
 mkiot="$(basename "$0")"
+mkiot_path="$(dirname "$(readlink -f "$BASH_SOURCE")")"
 
 set -e
 
-if [ ! -r ./mkimage/build-helpers.bash ] ; then
-        >&2 echo "Error: failed to load './mkimage/build-helpers.bash'"
+if [ ! -r "${mkiot_path}/mkimage/build-helpers.bash" ] ; then
+        >&2 echo "Error: failed to load '${mkiot_path}/mkimage/build-helpers.bash'"
         exit 1
 fi
 
-. ./mkimage/build-helpers.bash
+. ${mkiot_path}/mkimage/build-helpers.bash
 
 usage() {
 	echo >&2 "usage: $mkiot [-f buildspec.yaml] [-a arch] [-t tag] image [install-args]"
@@ -27,8 +28,6 @@ usage() {
 }
 
 user=$SUDO_USER
-
-scriptDir="$(dirname "$(readlink -f "$BASH_SOURCE")")/mkimage"
 
 optTemp=$(getopt --options '+f:a:t:hrC' --longoptions 'file:,remove,arch:,tag:,compression:,no-compression,help' --name "$mkimg" -- "$@")
 eval set -- "$optTemp"
@@ -181,7 +180,7 @@ run_phases_installs() {
         local build_args="$@"
 
         # Set default release mirror values
-        . ./mkimage/$base_image/install
+        . ${mkiot_path}/mkimage/$base_image/install
 
         export BASE_IMAGE_RELEASE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].release")")
         if [ -z $BASE_IMAGE_RELEASE ]; then
@@ -249,7 +248,7 @@ run_phases_installs() {
 
                 # pass all remaining arguments to $script
                 if [ "$base_image" == "debian" ]; then
-                        "mkimage/debootstrap" --arch="$ARCH" "$install_args" "$build_args"
+                        "${mkiot_path}/mkimage/debootstrap" --arch="$ARCH" "$install_args" "$build_args"
                 fi
         
                 #

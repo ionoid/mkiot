@@ -41,8 +41,6 @@ phases:
                         - command
 
                 - image: debian
-                  mirror: http://deb.debian.org/debian/
-                  release: stretch
                   name: debian-armhf-prod
                   cache: "reuse"
                   install-args:

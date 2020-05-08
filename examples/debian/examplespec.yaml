@@ -3,6 +3,12 @@ version: 0.1
 arch: armhf
 base-directory: build/
 
+env:
+        variables:
+                key: "value"
+                key2: "value"
+                key3: "value"
+
 phases:
         installs:
                 - image: debian
@@ -51,6 +57,7 @@ phases:
                 - use: debian-armhf-prod
                   commands:
                         - echo "Build production finished"
+                        - env
 
 artifacts:
         - name: debian-stretch-armhf

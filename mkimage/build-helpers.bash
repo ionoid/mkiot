@@ -99,6 +99,21 @@ load_buildspec() {
         eval "$(parse_yaml "$yaml_file" "$prefix")"
 }
 
+get_yaml_key_value() {
+        local yaml_file="$1"
+        local prefix="$2"
+        local idx="$3"
+        local sep="$4"
+
+        local key=$(cat "$yaml_file" | yq -r -c ".$prefix" | yq -r "to_entries | .[$idx].key")
+        if [ "$key" == "null" ]; then
+                echo -n "null"
+        else
+                local val=$(cat "$yaml_file" | yq -r -c ".$prefix" | yq -r "to_entries | .[$idx].value")
+                echo -n "${key}${sep}${val}"
+        fi
+}
+
 get_yaml_value() {
         local file="$1"
         local var="$2"
@@ -131,9 +146,9 @@ check_binfmt_qemu_arch() {
 }
 
 COPY() {
-        local from=""
         shift
 
+        local from=""
         for i in "$@"
         do
                 case "$i" in
@@ -165,7 +180,22 @@ COPY() {
 }
 
 RUN() {
-        "$CHROOT_CONTAINER" -D "$ROOTFS" "$@"
+        local shell=""
+        for i in "$@"
+        do
+                case "$i" in
+                        --shell=*)
+                        shell="${i#*=}"
+                        shift
+                        ;;
+                esac
+        done
+
+        if [ -n "$shell" ]; then
+                "$CHROOT_CONTAINER" -D "$ROOTFS" $ENV_VARS_PARMS "/bin/$shell" "-xc" "$@"
+        else
+                "$CHROOT_CONTAINER" -D "$ROOTFS" $ENV_VARS_PARMS "$@"
+        fi
 }
 
 get_base_image_mirror() {
@@ -206,6 +236,7 @@ tar_artifact() {
 
 run_yaml_commands() {
         local cmd="$1"
+
         if [ "$cmd" == "null" ]; then
                 return
         elif [ "$cmd" == "copy" ]; then

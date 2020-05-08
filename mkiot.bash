@@ -157,18 +157,24 @@ run_commands() {
         export ROOTFS="$1"
         local phase="$2"
         local idx="$3"
+        local shell="$4"
 
         # Walk now command instructions and run them
         for comsidx in {0..40}
         do
-                local cmd=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases${phase} | .[$idx].commands[$comsidx]")")
-                if [ "$cmd" == "null" ]; then
+                local cmdline=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases${phase} | .[$idx].commands[$comsidx]")")
+                if [ "$cmdline" == "null" ]; then
                         break
                 fi
 
                 (
                         set -x
-                        run_yaml_commands $cmd
+                        # expand cmdline on purpose
+                        if [ -z "$shell" ] || [ "$shell" == "null" ]; then
+                                run_yaml_commands $cmdline
+                        else
+                                run_yaml_commands "--shell=$shell" $cmdline
+                        fi
                 )
         done
 }
@@ -263,8 +269,10 @@ run_phases_installs() {
 'base-directory=$BASE_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args="
         fi
 
+        local shell=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].shell")")
+
         # Lets run commands from the installs phase
-        run_commands "${BASE_DIRECTORY}/${INSTALLS_NAME}" ".installs" "$idx"
+        run_commands "${BASE_DIRECTORY}/${INSTALLS_NAME}" ".installs" "$idx" "$shell"
 
         info "phases.installs[$idx] finished, image location: ${BASE_DIRECTORY}/$INSTALLS_NAME"
         echo
@@ -282,8 +290,10 @@ run_phases_pre_builds() {
 
         info "phases.pre-builds[$idx] started on 'image=${BASE_DIRECTORY}/${use_image}'"
 
+        local shell=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases[\"pre-builds\"] | .[$idx].shell")")
+
         # Lets run commands from the installs phase
-        run_commands "${BASE_DIRECTORY}/${use_image}" "[\"pre-builds\"]" "$idx"
+        run_commands "${BASE_DIRECTORY}/${use_image}" "[\"pre-builds\"]" "$idx" "$shell"
 
         info "phases.pre-builds[$idx] finished, image location: ${BASE_DIRECTORY}/${use_image}"
         echo
@@ -300,6 +310,8 @@ run_phases_builds() {
         fi
 
         info "phases.builds[$idx] started on 'image=${BASE_DIRECTORY}/${use_image}'"
+
+        local shell=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.builds | .[$idx].shell")")
 
         # Lets run commands from the installs phase
         run_commands "${BASE_DIRECTORY}/${use_image}" ".builds" "$idx"
@@ -319,6 +331,8 @@ run_phases_post_builds() {
         fi
 
         info "phases.post-builds[$idx] started on 'image=${BASE_DIRECTORY}/${use_image}'"
+
+        local shell=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases[\"post-builds\"] | .[$idx].shell")")
 
         # Lets run commands from the installs phase
         run_commands "${BASE_DIRECTORY}/${use_image}" "[\"post-builds\"]" "$idx"
@@ -372,9 +386,8 @@ generate_artifact() {
         local suffix=$(get_yaml_value "$BUILDSPEC" "$(printf %s "artifacts | .[$idx].suffix")")
         if [ "$suffix" != "null" ]; then
                 suffix="$(eval "$suffix")"
+                ARTIFACTS_NAME="$ARTIFACTS_NAME-$suffix"
         fi
-
-        ARTIFACTS_NAME="$ARTIFACTS_NAME-$suffix"
 
         info "Generating artifact '$ARTIFACTS_NAME'"
 
@@ -405,6 +418,24 @@ generate_artifact() {
 
         rm -fr "${ARTIFACTS_BASE_DIRECTORY}/${artifact}"
 }
+
+ENV_VARS_PARMS=""
+for i in {0..20}
+do
+        entry=$(get_yaml_key_value "$BUILDSPEC" "env.variables" "$i" "=")
+        if [ "$entry" == "null" ]; then
+                break
+        fi
+
+        if [ ! -n "${ENV_VARS_PARMS}" ]; then
+                ENV_VARS_PARMS="--setenv="${entry}""
+        else
+                ENV_VARS_PARMS="${ENV_VARS_PARMS} --setenv="${entry}""
+        fi
+done
+
+export ENV_VARS_PARMS="${ENV_VARS_PARMS}"
+
 
 ## Lets start first phase "installs"
 echo

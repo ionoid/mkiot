@@ -165,8 +165,7 @@ COPY() {
 }
 
 RUN() {
-	PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
-                "$CHROOT_CONTAINER" -D "$ROOTFS" "$@"
+        "$CHROOT_CONTAINER" -D "$ROOTFS" "$@"
 }
 
 get_base_image_mirror() {

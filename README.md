@@ -57,6 +57,7 @@ phases:
                 - use: debian-armhf-dev
                   commands:
                         - command
+                        - script scriptfile /bin/scriptfile
 
         builds:
                 # Set what image to use from installs

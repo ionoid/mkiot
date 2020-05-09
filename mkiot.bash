@@ -9,6 +9,10 @@ mkiot_path="$(dirname "$(readlink -f "$BASH_SOURCE")")"
 set -e
 
 if [ ! -r "${mkiot_path}/mkimage/build-helpers.bash" ] ; then
+        mkiot_path="/usr/lib/mkiot/"
+fi
+
+if [ ! -r "${mkiot_path}/mkimage/build-helpers.bash" ] ; then
         >&2 echo "Error: failed to load '${mkiot_path}/mkimage/build-helpers.bash'"
         exit 1
 fi
@@ -95,7 +99,8 @@ fi
 
 export BASE_DIRECTORY=$(get_yaml_value "$BUILDSPEC" "\"base-directory\"")
 if [ -z "$BASE_DIRECTORY" ]; then
-        fatal "'base-directory' of build output not set"
+        info "'base-directory' of build output not set, using './output/'"
+        export BASE_DIRECTORY="output/"
 fi
 
 if [ -z "$ARCH" ] || [ "$ARCH" == "null" ]; then

@@ -1,7 +1,7 @@
 version: 0.1
 
 arch: armhf
-base-directory: build/
+base-directory: output/
 
 phases:
         installs:

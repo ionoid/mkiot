@@ -232,10 +232,11 @@ run_phases_installs() {
 
         local reuse="false"
         local cache=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].cache")")
-        if [ -a ${BASE_DIRECTORY}/${INSTALLS_NAME} ]; then
+        echo "checking ${BASE_DIRECTORY}/${INSTALLS_NAME}  cache:${cache}"
+        if [ -a "${BASE_DIRECTORY}/${INSTALLS_NAME}" ]; then
                 if [ "$cache" == "null" ]; then
                         info "found image install at '${BASE_DIRECTORY}/${INSTALLS_NAME}'"
-                        info "removing image '${BASE_DIRECTORY}/${INSTALL_NAME}', \
+                        info "removing image '${BASE_DIRECTORY}/${INSTALLS_NAME}', \
                                 set 'cache: \"reuse\" to reuse old images"
                         rm -fr -- ${BASE_DIRECTORY}/${INSTALLS_NAME}
                 elif [ "$cache" == "reuse" ]; then

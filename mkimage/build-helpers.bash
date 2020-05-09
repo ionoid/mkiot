@@ -151,10 +151,8 @@ RUN_SCRIPT() {
                 esac
         done
 
-        local src="$1"
         local script="$1"
         local dest="$2"
-        shift 2
 
         if [ -z "$script" ]; then
                 fatal "SCRIPT() source script was not set"

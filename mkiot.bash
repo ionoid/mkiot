@@ -78,6 +78,26 @@ while true; do
 	esac
 done
 
+check_program pip \
+        "\tDebian/Ubuntu: package python-pip - A tool for installing and managing Python packages" \
+"\n\tError: install python-pip"
+
+check_program update-binfmts \
+        "\tDebian/Ubuntu: package binfmt-support - Support for extra binary formats" \
+"\n\tError: install binfmt-support"
+
+check_program yq \
+        "\tPython: Command-line YAML/XML processor" \
+"\n\tError: install with: pip install yq"
+
+check_program systemd-nspawn \
+        "\tDebian/Ubuntu: package systemd-container - systemd container/nspawn tools" \
+"\n\tError: install systemd-continer"
+
+check_program debootstrap \
+        "\tDebian/Ubuntu: package debootstrap - Bootstrap a basic Debian system" \
+"\n\tError: install debootstrap"
+
 if [ -z "$BUILDSPEC" ]; then
         error "-b 'buidspec.yaml' was not passed"
         usage
@@ -123,30 +143,10 @@ fi
 
 QEMU_ARCH=$(parse_arch_to_qemu_static $ARCH)
 
-check_program pip \
-        "\tDebian/Ubuntu: package python-pip - A tool for installing and managing Python packages" \
-"\n\tError: install python-pip"
-
 check_program qemu-$QEMU_ARCH-static \
         "\tDebian/Ubuntu: package qemu - fast processor emulator, dummy package\n \
 \tDebian/Ubuntu: package qemu-user-static - QEMU user mode emulation binaries (static version)" \
 "\n\tError: install qemu qemu-user-static"
-
-check_program update-binfmts \
-        "\tDebian/Ubuntu: package binfmt-support - Support for extra binary formats" \
-"\n\tError: install binfmt-support"
-
-check_program systemd-nspawn \
-        "\tDebian/Ubuntu: package systemd-container - systemd container/nspawn tools" \
-"\n\tError: install systemd-continer"
-
-check_program debootstrap \
-        "\tDebian/Ubuntu: package debootstrap - Bootstrap a basic Debian system" \
-"\n\tError: install debootstrap"
-
-check_program yq \
-        "\tPython: Command-line YAML/XML processor" \
-"\n\tError: install with: pip install yq"
 
 export QEMU_ARCH_INTERPRETER=$(check_binfmt_qemu_arch $QEMU_ARCH)
 

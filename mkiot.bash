@@ -420,21 +420,24 @@ generate_artifact() {
 }
 
 ENV_VARS_PARMS=""
-for i in {0..20}
-do
-        entry=$(get_yaml_key_value "$BUILDSPEC" "env.variables" "$i" "=")
-        if [ "$entry" == "null" ]; then
-                break
-        fi
+buildspecenvs=$(get_yaml_value "$BUILDSPEC" "$(printf %s "env.variables")")
+if [ "$buildspecenvs" != "null" ]; then
+        for i in {0..20}
+        do
+                entry=$(get_yaml_key_value "$BUILDSPEC" "env.variables" "$i" "=")
+                if [ "$entry" == "null" ]; then
+                        break
+                fi
 
-        if [ ! -n "${ENV_VARS_PARMS}" ]; then
-                ENV_VARS_PARMS="--setenv="${entry}""
-        else
-                ENV_VARS_PARMS="${ENV_VARS_PARMS} --setenv="${entry}""
-        fi
-done
+                if [ ! -n "${ENV_VARS_PARMS}" ]; then
+                        ENV_VARS_PARMS="--setenv="${entry}""
+                else
+                        ENV_VARS_PARMS="${ENV_VARS_PARMS} --setenv="${entry}""
+                fi
+        done
 
-export ENV_VARS_PARMS="${ENV_VARS_PARMS}"
+        export ENV_VARS_PARMS="${ENV_VARS_PARMS}"
+fi
 
 
 ## Lets start first phase "installs"

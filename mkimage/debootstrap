@@ -7,7 +7,7 @@ set -e
 mkimgdeb="$(basename "$0")"
 mkimg="$(dirname "$0").sh"
 
-. ./mkimage/build-helpers.bash
+. ${mkiot_path}/mkimage/build-helpers.bash
 
 usage() {
 	echo >&2 "usage: $mkimgdeb ROOTFS suite [debootstrap-args]"

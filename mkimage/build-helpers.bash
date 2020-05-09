@@ -176,7 +176,51 @@ COPY() {
                 src="$BASE_DIRECTORY/$from/$src"
         fi
 
-        cp -dfR --preserve=all "$src" "$ROOTFS/$dst"
+        cp -dfR --preserve=all "$(realpath $src)" "$ROOTFS/$dst"
+}
+
+RUN_SCRIPT() {
+        shift
+
+        local from=""
+        for i in "$@"
+        do
+                case "$i" in
+                        --from=*)
+                        from="${i#*=}"
+                        shift
+                        ;;
+                esac
+        done
+
+        local src="$1"
+        local script="$1"
+        local dest="$2"
+        shift 2
+
+        if [ -z "$script" ]; then
+                fatal "SCRIPT() source script was not set"
+        fi
+
+        # Copy from another image build
+        if [ -n "$from" ]; then
+                script="$BASE_DIRECTORY/$from/$script"
+        fi
+
+        if [ ! -f "$script" ]; then
+                fatal "SCRIPT() can not find file '$script'"
+        fi
+
+        if [ ! -x "$script" ]; then
+                fatal "SCRIPT() file '$script' is not executable"
+        fi
+
+        if [ -z "$dest" ]; then
+                dest="/bin/$script"
+        fi
+
+        "$CHROOT_CONTAINER" -D "$ROOTFS" --bind="$(realpath $script):$dest" $ENV_VARS_PARMS "$dest"
+
 }
 
 RUN() {
@@ -227,6 +271,10 @@ EOF
 
 }
 
+zip_artifact() {
+        fatal "Zip not supported now it will be added soon, please use 'tar'"
+}
+
 tar_artifact() {
         local file="$1"
         local target="$2"
@@ -241,6 +289,8 @@ run_yaml_commands() {
                 return
         elif [ "$cmd" == "copy" ]; then
                 COPY "$@"
+        elif [ "$cmd" == "script" ]; then
+                RUN_SCRIPT "$@"
         else
                 RUN "$@"
         fi

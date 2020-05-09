@@ -94,11 +94,11 @@ if [ -d "$ROOTFS/etc/apt/apt.conf.d" ]; then
 		# Ideally, these would just be invoking "apt-get clean", but in our testing,
 		# that ended up being cyclic and we got stuck on APT's lock, so we get this fun
 		# creation that's essentially just "apt-get clean".
-                #DPkg::Post-Invoke { ${aptGetClean} };
-                #APT::Update::Post-Invoke { ${aptGetClean} };
+                # DPkg::Post-Invoke { ${aptGetClean} };
+                # APT::Update::Post-Invoke { ${aptGetClean} };
 
-                #Dir::Cache::pkgcache "";
-                #Dir::Cache::srcpkgcache "";
+                # Dir::Cache::pkgcache "";
+                # Dir::Cache::srcpkgcache "";
 
 		# Note that we do realize this isn't the ideal way to do this, and are always
 		# open to better suggestions (https://github.com/docker/docker/issues).
@@ -219,10 +219,16 @@ fi
 	RUN --shell=sh -xc 'apt-get update && apt-get dist-upgrade -y'
 
 	# delete all the apt list files since they're big and get stale quickly
-	rm -rf "$ROOTFS/var/lib/apt/lists"/*
+	RUN --shell=sh -xc "rm -rf /var/lib/apt/lists/*"
 	# this forces "apt-get update" in dependent images, which is also good
 
-	mkdir "$ROOTFS/var/lib/apt/lists/partial" # Lucid... "E: Lists directory /var/lib/apt/lists/partial is missing."
+        # Deactive those as it seems it is causing bugs
+        # RUN --shell=sh -xc "mkdir -p /var/lib/apt/lists/partial" # Lucid... "E: Lists directory /var/lib/apt/lists/partial is missing."
+        # RUN --shell=sh -xc "mkdir -p /var/lib/apt/lists/auxfiles"
+        # RUN --shell=sh -xc "chown -Rv _apt:root /var/lib/apt/lists/partial"
+        # RUN --shell=sh -xc "chown -Rv _apt:root /var/lib/apt/lists/auxfiles"
+        # RUN --shell=sh -xc "mkdir -p /var/cache/apt/archives/partial/"
+        # RUN --shell=sh -xc "chown -Rv _apt:root /var/cache/apt/archives/partial/"
 )
 
 finalize_etc_config $ROOTFS

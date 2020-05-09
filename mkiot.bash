@@ -95,7 +95,7 @@ fi
 
 export BASE_DIRECTORY=$(get_yaml_value "$BUILDSPEC" "\"base-directory\"")
 if [ -z "$BASE_DIRECTORY" ]; then
-        export BASE_DIRECTORY="build/"
+        fatal "'base-directory' of build output not set"
 fi
 
 if [ -z "$ARCH" ] || [ "$ARCH" == "null" ]; then

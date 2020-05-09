@@ -186,12 +186,17 @@ run_commands() {
 
 run_phases_installs() {
         local idx="$1"
-        local base_image="$2"
-        shift 2
+        shift 1
         local build_args="$@"
 
-        # Set default release mirror values
-        . ${mkiot_path}/mkimage/$base_image/install
+        if [ "$BASE_IMAGE" == "debian" ]; then
+                # Set default release mirror values
+                . ${mkiot_path}/mkimage/$BASE_IMAGE/install
+        fi
+
+        if [ -z "$BASE_IMAGE" ]; then
+                fatal "'phases.installs[$idx].image or base image is not set in buildspec and no default value"
+        fi
 
         export BASE_IMAGE_RELEASE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].release")")
         if [ -z $BASE_IMAGE_RELEASE ]; then
@@ -206,7 +211,7 @@ run_phases_installs() {
         fi
 
         if [ -z "$BASE_IMAGE_MIRROR" ]; then
-                fatal "'phases.installs[$idx].mirror' for image '$base_image' is not set in buildspec and no default value"
+                fatal "'phases.installs[$idx].mirror' for image '$BASE_IMAGE' is not set in buildspec and no default value"
         fi
 
         mkdir -p ${BASE_DIRECTORY}
@@ -223,7 +228,7 @@ run_phases_installs() {
                 install_args=""
         fi
 
-        info "phases.installs[$idx] OS '$base_image' into 'image=${BASE_DIRECTORY}/${INSTALLS_NAME}'"
+        info "phases.installs[$idx] OS '$BASE_IMAGE' into 'image=${BASE_DIRECTORY}/${INSTALLS_NAME}'"
 
         local reuse="false"
         local cache=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].cache")")
@@ -254,12 +259,16 @@ run_phases_installs() {
                 chown ${user}.${user} ${ROOTFS}
 
                 echo
-                info "Building with: 'buildspec=$BUILDSPEC' phases.installs[$idx] 'arch=$ARCH' 'image=$base_image' 'release=$BASE_IMAGE_RELEASE' \
+                info "Building with: 'buildspec=$BUILDSPEC' phases.installs[$idx] 'arch=$ARCH' 'image=$BASE_IMAGE' 'release=$BASE_IMAGE_RELEASE' \
 'base-directory=$BASE_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args=$install_args $build_args'"
 
-                # pass all remaining arguments to $script
-                if [ "$base_image" == "debian" ]; then
+                if [[ "$BASE_IMAGE_MIRROR" == *"ionoid"* ]]; then
+                        "${mkiot_path}/mkimage/ionoid-bootstrap.bash" --arch="$ARCH" "$install_args" "$build_args"
+                elif [ "$BASE_IMAGE" == "debian" ]; then
+                        # pass all remaining arguments to $script
                         "${mkiot_path}/mkimage/debootstrap" --arch="$ARCH" "$install_args" "$build_args"
+                else
+                        fatal "unsupported target image '$BASE_IMAGE'"
                 fi
         
                 #
@@ -270,7 +279,7 @@ run_phases_installs() {
 
         else
                 echo
-                info "Reusing image: phases.installs[$idx] 'arch=$ARCH' 'image=$base_image' 'release=$BASE_IMAGE_RELEASE' \
+                info "Reusing image: phases.installs[$idx] 'arch=$ARCH' 'image=$BASE_IMAGE' 'release=$BASE_IMAGE_RELEASE' \
 'base-directory=$BASE_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args="
         fi
 
@@ -450,16 +459,15 @@ echo
 info "Running phases installs"
 for i in {0..4}
 do
-        BASE_IMAGE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$i].image")")
+        export BASE_IMAGE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$i].image")")
         if [ "$BASE_IMAGE" == "null" ]; then
                 break
-        elif [ "$BASE_IMAGE" == "debian" ]; then
-                run_phases_installs "$i" "$BASE_IMAGE" "$@"
-        elif [ "$BASE_IMAGE" == "alpine" ]; then
-                fatal "Image '$BASE_IMAGE' is not yet supported"
-        else
-                fatal "Image '$BASE_IMAGE' is not supported"
+        elif [ -z "$BASE_IMAGE" ]; then
+                fatal "image was not set"
         fi
+
+        run_phases_installs "$i" "$@"
+        BASE_IMAGE="null"
 done
 
 ## Lets run "pre-builds"

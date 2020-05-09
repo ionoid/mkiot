@@ -96,19 +96,29 @@ artifacts:
 mkiot needs the following packages:
 
 - qemu qemu-user-static
+```bash
         sudo apt-get install qemu qemu-user-static
+```
 
 - binfmt-support
+```bash
         sudo apt-get install binfmt-support
+```
 
 - systemd-container or systemd-nspawn
+```bash
         sudo apt-get install systemd-container
+```
 
 - deboostrap
+```bash
         sudo apt-get install debootstrap
+```
 
 - yq: Command-line YAML/XML processor  https://kislyuk.github.io/yq/
+```bash
         pip install yq
+```
 
 
 Of course it needs other tools that should be installed tar, zip etc

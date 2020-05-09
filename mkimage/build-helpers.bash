@@ -49,61 +49,15 @@ parse_arch_to_qemu_static() {
         fi
 }
 
-# https://github.com/jasperes/bash-yaml
-parse_yaml() {
-        local yaml_file=$1
-        local prefix=$2
-        local s
-        local w
-        local fs
-
-        s='[[:space:]]*'
-        w='[a-zA-Z0-9_.-]*'
-        fs="$(echo @|tr @ '\034')"
-
-        (
-                sed -e '/- [^\“]'"[^\']"'.*: /s|\([ ]*\)- \([[:space:]]*\)|\1-\'$'\n''  \1\2|g' |
-
-                sed -ne '/^--/s|--||g; s|\"|\\\"|g; s/[[:space:]]*$//g;' \
-                        -e "/#.*[\"\']/!s| #.*||g; /^#/s|#.*||g;" \
-                        -e "s|^\($s\)\($w\)$s:$s\"\(.*\)\"$s\$|\1$fs\2$fs\3|p" \
-                        -e "s|^\($s\)\($w\)${s}[:-]$s\(.*\)$s\$|\1$fs\2$fs\3|p" |
-
-                awk -F"$fs" '{
-                        indent = length($1)/2;
-                        if (length($2) == 0) { conj[indent]="+";} else {conj[indent]="";}
-                        vname[indent] = $2;
-                        for (i in vname) {if (i > indent) {delete vname[i]}}
-                        if (length($3) > 0) {
-                        vn=""; for (i=0; i<indent; i++) {vn=(vn)(vname[i])("_")}
-                        printf("%s%s%s%s=(\"%s\")\n", "'"$prefix"'",vn, $2, conj[indent-1],$3);
-                        }
-                }' |
-
-                sed -e 's/_=/+=/g' |
-
-                awk 'BEGIN {
-                        FS="=";
-                        OFS="="
-                }
-                /(-|\.).*=/ {
-                        gsub("-|\\.", "_", $1)
-                }
-                { print }'
-        ) < "$yaml_file"
-}
-
-load_buildspec() {
-        local yaml_file="$1"
-        local prefix="$2"
-        eval "$(parse_yaml "$yaml_file" "$prefix")"
-}
-
 get_yaml_key_value() {
         local yaml_file="$1"
         local prefix="$2"
         local idx="$3"
         local sep="$4"
+
+        if [ ! -f "$yaml_file" ]; then
+                fatal "File buildspec yaml '$yaml_file' can not be found"
+        fi
 
         local key=$(cat "$yaml_file" | yq -r -c ".$prefix" | yq -r "to_entries | .[$idx].key")
         if [ "$key" == "null" ]; then
@@ -117,6 +71,10 @@ get_yaml_key_value() {
 get_yaml_value() {
         local file="$1"
         local var="$2"
+
+        if [ ! -f "$file" ]; then
+                fatal "File buildspec yaml '$file' can not be found"
+        fi
 
         echo -n "$(cat "$file" | yq -r -c ".$var")"
 }

@@ -94,11 +94,11 @@ if [ -d "$ROOTFS/etc/apt/apt.conf.d" ]; then
 		# Ideally, these would just be invoking "apt-get clean", but in our testing,
 		# that ended up being cyclic and we got stuck on APT's lock, so we get this fun
 		# creation that's essentially just "apt-get clean".
-		DPkg::Post-Invoke { ${aptGetClean} };
-		APT::Update::Post-Invoke { ${aptGetClean} };
+                #DPkg::Post-Invoke { ${aptGetClean} };
+                #APT::Update::Post-Invoke { ${aptGetClean} };
 
-		Dir::Cache::pkgcache "";
-		Dir::Cache::srcpkgcache "";
+                #Dir::Cache::pkgcache "";
+                #Dir::Cache::srcpkgcache "";
 
 		# Note that we do realize this isn't the ideal way to do this, and are always
 		# open to better suggestions (https://github.com/docker/docker/issues).

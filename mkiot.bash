@@ -4,12 +4,12 @@
 # Copyright (C) 2020 Harouni Djalal <tixxdz@opendevices.io>
 
 mkiot="$(basename "$0")"
-mkiot_path="$(dirname "$(readlink -f "$BASH_SOURCE")")"
+export mkiot_path="$(dirname "$(readlink -f "$BASH_SOURCE")")"
 
 set -e
 
 if [ ! -r "${mkiot_path}/mkimage/build-helpers.bash" ] ; then
-        mkiot_path="/usr/lib/mkiot/"
+        export mkiot_path="/usr/lib/mkiot/"
 fi
 
 if [ ! -r "${mkiot_path}/mkimage/build-helpers.bash" ] ; then

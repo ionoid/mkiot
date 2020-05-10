@@ -40,7 +40,7 @@ unset optTemp
 ARCH=
 BASE_IMAGE_RELEASE=
 BASE_IMAGE=
-BUILD_SPEC=
+BUILDSPEC=
 ARTIFACTS_COMPRESSION="tar"
 ARTIFACTS_NAME=
 REMOVE_PREVIOUS="false"
@@ -51,7 +51,7 @@ while true; do
                         shift 2
                         ;;
 		-f | --file)
-			BUILDSPEC="$2"
+			export BUILDSPEC="$2"
 			shift 2
 			;;
 		-t | --tag)
@@ -99,7 +99,7 @@ check_program debootstrap \
 "\n\tError: install debootstrap"
 
 if [ -z "$BUILDSPEC" ]; then
-        error "-b 'buidspec.yaml' was not passed"
+        error "-f 'buidspec.yaml' was not passed"
         usage
 fi
 

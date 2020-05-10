@@ -260,3 +260,16 @@ run_yaml_commands() {
                 RUN "$@"
         fi
 }
+
+check_url() {
+        local url="$1"
+        if command -v wget; then
+                info "Checking url '$url'"
+                local ret=$(wget -S --spider $url 2>&1 | grep 'HTTP/1.1 200 OK')
+                if [ -z "$ret" ]; then
+                        fatal "Check url '$url' failed"
+                fi
+        else
+                fatal "check url failed can not locate 'wget'"
+        fi
+}

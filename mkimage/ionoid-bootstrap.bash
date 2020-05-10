@@ -39,6 +39,8 @@ if [ "$BASE_IMAGE" == "scratch" ]; then
 else
         URL="${BASE_IMAGE_MIRROR}/${BASE_IMAGE}"
 
+        check_url $URL
+
         cpwd=$(pwd)
         cd $(realpath "${BASE_DIRECTORY}")
 

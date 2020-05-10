@@ -14,15 +14,36 @@ if [ -z "$BASE_IMAGE_MIRROR" ]; then
         fatal "ionoid bootstrap failed 'BASE_IMAGE_MIRROR' not set"
 fi
 
-URL="${BASE_IMAGE_MIRROR}${BASE_IMAGE}"
+if [ "$BASE_IMAGE" == "scratch" ]; then
+        cpwd=$(pwd)
+        cd $(realpath "${ROOTFS}")
 
-rm -fr image.tar
-wget -O ${BASE_DIRECTORY}/image.tar "$URL"
+        mkdir -p --mode=700 "/root"
+        mkdir -p --mode=755 "/dev" "/tmp" "/sys" "/proc" "/usr/bin" \
+                "/usr/sbin" "/etc" "/home" \
+                "/mnt" "/opt" "/run" "/var/log"
+        mkdir -p --mode=755 "/usr/lib" "/usr/lib32" "/usr/lib64" "/usr/libx32"
 
-cpwd=$(pwd)
-cd $(realpath ${BASE_DIRECTORY})
+        ln -sr usr/bin bin
+        ln -sr usr/sbin sbin
+        ln -sr usr/lib lib
+        ln -sr usr/lib32 lib32
+        ln -sr usr/lib64 lib64
+        ln -sr usr/libx32 libx32
 
-tar -xf image.tar -C $ROOTFS
-rm -fr image.tar
+        cd $cpwd
+else
+        URL="${BASE_IMAGE_MIRROR}/${BASE_IMAGE}"
 
-cd $cpwd
+        cpwd=$(pwd)
+        cd $(realpath "${BASE_DIRECTORY}")
+
+        tmpfile="$(mktemp "image-download-$(date +%Y-%m-%d).XXXXXXXXXX").tar"
+        info "Downloading '${URL} into ${BASE_DIRECTORY}/${tmpfile}'"
+        wget -O "${tmpfile}" "${URL}"
+
+        tar -xf "${tmpfile}" -C $ROOTFS
+        rm -fr "${tmpfile}"
+
+        cd $cpwd
+fi

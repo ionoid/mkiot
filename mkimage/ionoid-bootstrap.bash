@@ -1,10 +1,14 @@
 #!/bin/bash
 
-set -e
+set -xe
 
 ionoid_bootstrap="$(basename "$0")"
 
 . ${mkiot_path}/mkimage/build-helpers.bash
+
+if [ -z "$ROOTFS" ]; then
+        fatal "ionoid bootstrap failed 'ROOTFS' not set"
+fi
 
 if [ -z "$BASE_IMAGE" ]; then
         fatal "ionoid bootstrap failed 'BASE_IMAGE' not set"
@@ -15,15 +19,15 @@ if [ -z "$BASE_IMAGE_MIRROR" ]; then
 fi
 
 if [ "$BASE_IMAGE" == "scratch" ]; then
+        mkdir -p --mode=700 "${ROOTFS}/root"
+        mkdir -p --mode=755 "${ROOTFS}/dev" "${ROOTFS}/tmp" "${ROOTFS}/sys" "${ROOTFS}/proc" \
+                "$ROOTFS/usr/bin" "$ROOTFS/usr/sbin" "$ROOTFS/etc" "$ROOTFS/home" \
+                "$ROOTFS/mnt" "$ROOTFS/opt" "$ROOTFS/run" "$ROOTFS/var/log"
+        mkdir -p --mode=755 "$ROOTFS/usr/lib" "$ROOTFS/usr/lib32" \
+                "$ROOTFS/usr/lib64" "$ROOTFS/usr/libx32"
+
         cpwd=$(pwd)
         cd $(realpath "${ROOTFS}")
-
-        mkdir -p --mode=700 "/root"
-        mkdir -p --mode=755 "/dev" "/tmp" "/sys" "/proc" "/usr/bin" \
-                "/usr/sbin" "/etc" "/home" \
-                "/mnt" "/opt" "/run" "/var/log"
-        mkdir -p --mode=755 "/usr/lib" "/usr/lib32" "/usr/lib64" "/usr/libx32"
-
         ln -sr usr/bin bin
         ln -sr usr/sbin sbin
         ln -sr usr/lib lib

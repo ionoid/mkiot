@@ -12,8 +12,8 @@ env:
 
 phases:
         installs:
-                - image: devtools_debian-buster_armhf.tar
-                  mirror: https://www.ionoid.io/image-library/
+                - image: debian
+                  mirror: http://deb.debian.org/debian/
                   name: golang-1.14.2_debian-buster_armhf
                   cache: "reuse"
                   install-args:
@@ -21,6 +21,10 @@ phases:
                   commands:
                         - echo "Installed debian buster"
                         - apt-get update
+                        - apt-get install -y --no-install-recommends
+                                build-essential pkg-config
+                                ca-certificates curl netbase wget
+                        - echo "Installed debian wit minimal build packages"
 
 
         builds:
@@ -28,6 +32,12 @@ phases:
                 - use: golang-1.14.2_debian-buster_armhf
                   commands:
                         - script golang-install.sh
+                        - echo "golang version '$GOLANG_VERSION' installed"
+
+        post-builds:
+                - use: golang-1.14.2_debian-buster_armhf
+                  commands:
+                        - rm -rf /var/lib/apt/lists/*
 
 artifacts:
         - name: golang-1.14.2_debian-buster_armhf

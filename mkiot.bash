@@ -78,6 +78,11 @@ while true; do
 	esac
 done
 
+if [ "$(id -u)" -ne "0" ]; then
+        echo "Error: must be root"
+        exit 1
+fi
+
 check_program pip \
         "\tDebian/Ubuntu: package python-pip - A tool for installing and managing Python packages" \
 "\n\tError: install python-pip"
@@ -106,11 +111,6 @@ fi
 if [ ! -f "$BUILDSPEC" ]; then
         error "could not find '$BUILDSPEC' file"
         usage
-fi
-
-if [ "$(id -u)" -ne "0" ]; then
-        >&2 echo "Error: must be root"
-        exit 1
 fi
 
 if [ -z "$ARCH" ]; then
@@ -189,7 +189,7 @@ run_phases_installs() {
         shift 1
         local build_args="$@"
 
-        if [ "$BASE_IMAGE" == "debian" ]; then
+        if [ "$BASE_IMAGE" == "debian" ] || [ "$BASE_IMAGE" == "scratch" ]; then
                 # Set default release mirror values
                 . ${mkiot_path}/mkimage/$BASE_IMAGE/install
                 export BASE_IMAGE_RELEASE="${release}"

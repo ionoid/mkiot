@@ -38,6 +38,7 @@ phases:
                 - use: golang-1.14.2_debian-buster_armhf
                   commands:
                         - rm -rf /var/lib/apt/lists/*
+                        - rm -rf /var/cache/apt/archives/partial/
 
 artifacts:
         - name: golang-1.14.2_debian-buster_armhf

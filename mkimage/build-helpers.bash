@@ -184,7 +184,7 @@ RUN_SCRIPT() {
                 dest="/bin/$(basename ${script})"
         fi
 
-        "$CHROOT_CONTAINER" -D "$ROOTFS" --bind="$(realpath ${script}):${dest}" $ENV_VARS_PARMS "${dest}" 2>/dev/null
+        "$CHROOT_CONTAINER" -D "$ROOTFS" --bind="$(realpath ${script}):${dest}" $ENV_VARS_PARMS "${dest}"
 
 }
 
@@ -201,9 +201,9 @@ RUN() {
         done
 
         if [ -n "$shell" ]; then
-                "$CHROOT_CONTAINER" -D "$ROOTFS" $ENV_VARS_PARMS "/bin/$shell" "-xc" "$@" 2>/dev/null
+                "$CHROOT_CONTAINER" -D "$ROOTFS" $ENV_VARS_PARMS "/bin/$shell" "-xc" "$@"
         else
-                "$CHROOT_CONTAINER" -D "$ROOTFS" $ENV_VARS_PARMS "$@" 2>/dev/null
+                "$CHROOT_CONTAINER" -D "$ROOTFS" $ENV_VARS_PARMS "$@"
         fi
 }
 

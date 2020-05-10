@@ -164,6 +164,14 @@ RUN_SCRIPT() {
         fi
 
         if [ ! -f "$script" ]; then
+                error "SCRIPT() can not find file '$script'"
+
+                # lets try directory of buildspec
+                local lp=$(realpath ${BUILDSPEC})
+                script="${lp}/${script}"
+        fi
+
+        if [ ! -f "$script" ]; then
                 fatal "SCRIPT() can not find file '$script'"
         fi
 
@@ -172,7 +180,8 @@ RUN_SCRIPT() {
         fi
 
         if [ -z "$dest" ]; then
-                dest="/bin/${script}"
+                # lets force it to be in "/bin/"
+                dest="/bin/$(basename ${script})"
         fi
 
         "$CHROOT_CONTAINER" -D "$ROOTFS" --bind="$(realpath ${script}):${dest}" $ENV_VARS_PARMS "${dest}" 2>/dev/null

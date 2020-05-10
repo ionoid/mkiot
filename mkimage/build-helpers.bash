@@ -167,7 +167,7 @@ RUN_SCRIPT() {
                 error "SCRIPT() can not find file '$script'"
 
                 # lets try directory of buildspec
-                local lp=$(realpath ${BUILDSPEC})
+                local lp="$(dirname $(realpath ${BUILDSPEC}))"
                 script="${lp}/${script}"
         fi
 

@@ -192,22 +192,24 @@ run_phases_installs() {
         if [ "$BASE_IMAGE" == "debian" ]; then
                 # Set default release mirror values
                 . ${mkiot_path}/mkimage/$BASE_IMAGE/install
+                export BASE_IMAGE_RELEASE="${release}"
+                export BASE_IMAGE_MIRROR="${mirror}"
         fi
 
         if [ -z "$BASE_IMAGE" ]; then
                 fatal "'phases.installs[$idx].image or base image is not set in buildspec and no default value"
         fi
 
-        export BASE_IMAGE_RELEASE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].release")")
-        if [ -z $BASE_IMAGE_RELEASE ]; then
+        local l_release=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].release")")
+        if [ "$l_release" != "null" ]; then
                 # Use default release
-                export BASE_IMAGE_RELEASE=$release
+                export BASE_IMAGE_RELEASE="${l_release}"
         fi
 
-        export BASE_IMAGE_MIRROR=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].mirror")")
-        if [ -z $BASE_IMAGE_MIRROR ]; then
+        local l_mirror=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].mirror")")
+        if [ "$l_mirror" != "null" ]; then
                 # Use default mirror
-                export BASE_IMAGE_MIRROR=$mirror
+                export BASE_IMAGE_MIRROR="${l_mirror}"
         fi
 
         if [ -z "$BASE_IMAGE_MIRROR" ]; then

@@ -267,6 +267,8 @@ run_phases_installs() {
 
                 if [[ "$BASE_IMAGE_MIRROR" == *"ionoid"* ]]; then
                         "${mkiot_path}/mkimage/ionoid-bootstrap.bash" --arch="$ARCH" "$install_args" "$build_args"
+                elif [ "$BASE_IMAGE" == "scratch" ]; then
+                        "${mkiot_path}/mkimage/ionoid-bootstrap.bash"
                 elif [ "$BASE_IMAGE" == "debian" ]; then
                         # pass all remaining arguments to $script
                         "${mkiot_path}/mkimage/debootstrap" --arch="$ARCH" "$install_args" "$build_args"
@@ -423,9 +425,10 @@ generate_artifact() {
 
                 if [ -d "${BASE_DIRECTORY}/${file}" ]; then
                         cp -dfR --preserve=all "${BASE_DIRECTORY}/${file}/." "${ARTIFACTS_BASE_DIRECTORY}/${artifact}"
+                elif [ -f "${BASE_DIRECTORY}/${file}" ]; then
+                        cp -df --preserve=all "${BASE_DIRECTORY}/${file}" "${ARTIFACTS_BASE_DIRECTORY}/${artifact}"
                 else
-                        error "failed to add '${BASE_DIRECTORY}/${file}' content to artifact: not a directory"
-                        break
+                        error "failed to add '${BASE_DIRECTORY}/${file}' to artifact '${artifact}' not supported"
                 fi
         done
 

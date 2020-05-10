@@ -1,0 +1,36 @@
+version: 0.1
+
+arch: armhf
+base-directory: output/
+
+env:
+        variables:
+                GOLANG_VERSION: "1.14.2"
+                OS: linux
+                GOLANG_ARCH: "armv6l"
+                GOPATH: "/go"
+
+phases:
+        installs:
+                - image: devtools_debian-buster_armhf.tar
+                  mirror: https://www.ionoid.io/image-library/
+                  name: golang-1.14.2_devtools_debian-buster_armhf
+                  cache: "reuse"
+                  install-args:
+                  runtime-versions:
+                  commands:
+                        - echo "Installed debian buster"
+                        - apt-get update
+
+
+        builds:
+                # Set what image to use from installs
+                - use: golang-1.14.2_devtools_debian-buster_armhf
+                  commands:
+                        - script golang-install.sh
+
+artifacts:
+        - name: golang-1.14.2_devtools_debian-buster_armhf
+          files:
+                - golang-1.14.2_devtools_debian-buster_armhf
+          compression: tar

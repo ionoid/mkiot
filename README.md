@@ -32,13 +32,17 @@ env:
                 key: "value"
                 key1: "value"
 
+cache:
+        images:
+                - /var/lib/mkiot/images/cache/
+
 phases:
         installs:
                 - image: debian
                   mirror: http://deb.debian.org/debian/
                   release: stretch
                   name: debian-armhf-dev
-                  cache: "reuse"
+                  cache: "save,reuse"
                   install-args:
                   runtime-versions:
                   commands:

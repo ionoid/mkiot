@@ -154,11 +154,30 @@ if [ ! -f $QEMU_ARCH_INTERPRETER ]; then
         fatal "failed to find valid a $QEMU_ARCH_INTERPRETER interpreter for $ARCH"
 fi
 
+echo
+export IMAGES_CACHE=$(get_yaml_value "$BUILDSPEC" "cache.images | .[0]")
+if [ -z "$IMAGES_CACHE" ] || [ "$IMAGES_CACHE" == "null" ]; then
+        export IMAGES_CACHE="/var/lib/mkiot/images/cache/"
+        info "Cache for images not set, using: $IMAGES_CACHE"
+else
+        export IMAGES_CACHE=$(realpath $IMAGES_CACHE)
+fi
+
+mkdir -p "${IMAGES_CACHE}"
+chmod 700 "${IMAGES_CACHE}"
+if [ ! -d $IMAGES_CACHE ]; then
+        fatal "Cache '$IMAGES_CACHE' directory check failed"
+fi
+
+cache_size="$(du -sh ${IMAGES_CACHE})"
+info "Cache size usage: ${cache_size}"
+
 export CHROOT_CONTAINER=$(which systemd-nspawn)
 
 time="$(date +%F_%H%M%S)"
 
 run_commands() {
+        # update ROOTFS here
         export ROOTFS="$1"
         local phase="$2"
         local idx="$3"
@@ -233,25 +252,30 @@ run_phases_installs() {
         info "phases.installs[$idx] OS '$BASE_IMAGE' into 'image=${BASE_DIRECTORY}/${INSTALLS_NAME}'"
 
         local reuse="false"
+        local saveincache="false"
         local cache=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].cache")")
-        echo "checking ${BASE_DIRECTORY}/${INSTALLS_NAME}  cache:${cache}"
-        if [ -a "${BASE_DIRECTORY}/${INSTALLS_NAME}" ]; then
-                if [ "$cache" == "null" ]; then
-                        info "found image install at '${BASE_DIRECTORY}/${INSTALLS_NAME}'"
-                        info "removing image '${BASE_DIRECTORY}/${INSTALLS_NAME}', \
-                                set 'cache: \"reuse\" to reuse old images"
-                        rm -fr -- ${BASE_DIRECTORY}/${INSTALLS_NAME}
-                elif [ "$cache" == "reuse" ]; then
-                        reuse="true"
+        if [ -z "$cache" ] || [ "$cache" == "null" ]; then
+                info "removing image '${BASE_DIRECTORY}/${INSTALLS_NAME}', \
+                        set 'cache: \"reuse\" to reuse old images"
+                rm -fr -- "${BASE_DIRECTORY}/${INSTALLS_NAME}"
+        elif [[ "$cache" == *"reuse"* ]]; then
+                reuse="true"
+                if [ -d "${IMAGES_CACHE}/${INSTALLS_NAME}" ]; then
+                        rm -fr -- "${BASE_DIRECTORY}/${INSTALLS_NAME}"
+                        info "Cache found image install at '${IMAGES_CACHE}/${INSTALLS_NAME}'"
+                        info "Copying image from cache to '${BASE_DIRECTORY}/${INSTALLS_NAME}'"
+                        cp -dfR --preserve=all "${IMAGES_CACHE}/${INSTALLS_NAME}" "${BASE_DIRECTORY}/${INSTALLS_NAME}/"
+                        chown ${user}.${user} "${BASE_DIRECTORY}/${INSTALLS_NAME}"
                 else
-                        fatal "image already exists at '${BASE_DIRECTORY}/${INSTALLS_NAME}', \
-                                set 'cache: '$cache'' value not supported"
+                        # Image was not found so lets recreate it
+                        reuse="false"
                 fi
+        else
+                fatal "Cache check value '$cache' not supported on image ${INSTALLS_NAME}'"
         fi
 
         if [ "$reuse" == "false" ]; then
                 local builddir="$(mktemp -d ${BASE_DIRECTORY}/${INSTALLS_NAME}.XXXXXXXXXXX.tmp)"
-
                 export ROOTFS="$builddir"
                 (
 	                set -x
@@ -286,6 +310,9 @@ run_phases_installs() {
                 echo
                 info "Reusing image: phases.installs[$idx] 'arch=$ARCH' 'image=$BASE_IMAGE' 'release=$BASE_IMAGE_RELEASE' \
 'base-directory=$BASE_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args="
+                if [ ! -d "${BASE_DIRECTORY}/${INSTALLS_NAME}" ]; then
+                        fatal "Image '${BASE_DIRECTORY}/${INSTALLS_NAME} not found!"
+                fi
         fi
 
         local shell=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].shell")")
@@ -293,7 +320,18 @@ run_phases_installs() {
         # Lets run commands from the installs phase
         run_commands "${BASE_DIRECTORY}/${INSTALLS_NAME}" ".installs" "$idx" "$shell"
 
-        info "phases.installs[$idx] finished, image location: ${BASE_DIRECTORY}/$INSTALLS_NAME"
+        info "phases.installs[$idx] finished, image location: ${BASE_DIRECTORY}/${INSTALLS_NAME}"
+
+        if [[ "$cache" == *"save"* ]]; then
+                info "Cache saving '${BASE_DIRECTORY}/${INSTALLS_NAME} into cache ${IMAGES_CACHE}"
+                cp -dfR --preserve=all "${BASE_DIRECTORY}/${INSTALLS_NAME}" "${IMAGES_CACHE}/${INSTALLS_NAME}.tmp/"
+                rm -fr -- "${IMAGES_CACHE}/${INSTALLS_NAME}"
+                mv -f "${IMAGES_CACHE}/${INSTALLS_NAME}.tmp" "${IMAGES_CACHE}/${INSTALLS_NAME}"
+                chown root.root "${IMAGES_CACHE}/${INSTALLS_NAME}"
+                chown root.root "${IMAGES_CACHE}"
+                chmod 700 "${IMAGES_CACHE}"
+        fi
+
         echo
 }
 

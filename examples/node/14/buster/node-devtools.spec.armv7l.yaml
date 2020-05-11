@@ -29,7 +29,7 @@ phases:
                         - script node-install.sh
                         - rm -rf /var/lib/apt/lists/*
                         - rm -rf /var/cache/apt/archives/partial/
-                        - echo "Installed node ${NODE_VERSION} buster"
+                        - echo Installed node $NODE_VERSION buster
 
 artifacts:
         - name: node-14.2.0_devtools_debian-buster_armhf

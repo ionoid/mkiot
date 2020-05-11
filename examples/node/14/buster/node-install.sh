@@ -33,5 +33,5 @@ set -ex
 
 curl --cacert "/etc/ssl/certs/ca-certificates.crt" -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-sudo apt update && sudo apt install -y --no-install-recommends yarn \
+apt update && apt install -y --no-install-recommends yarn \
   && yarn --version

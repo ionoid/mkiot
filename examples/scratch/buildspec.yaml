@@ -1,0 +1,23 @@
+version: 0.1
+
+arch: armhf
+base-directory: output/
+
+env:
+        variables:
+
+phases:
+        installs:
+                - image: scratch
+                  name: scratch-base-image
+                  cache: "save,reuse"
+
+        builds:
+                - use: scratch-base-image
+                  commands:
+
+artifacts:
+        - name: app-image-v1
+          files:
+                - scratch-base-image
+          compression: tar

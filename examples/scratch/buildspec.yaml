@@ -1,7 +1,7 @@
 version: 0.1
 
 arch: armhf
-base-directory: output/
+build-directory: output/
 
 env:
         variables:
@@ -17,7 +17,7 @@ phases:
                   commands:
 
 artifacts:
-        - name: app-image-v1
+        - use: scratch-base-image
+          name: app-image-v1
           files:
-                - scratch-base-image
           compression: tar

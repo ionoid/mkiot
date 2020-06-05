@@ -11,7 +11,7 @@ Internally It uses `debootstrap` and other classic Linux tools. `mkiot` provides
 
 * Produces classic archives format: `zip` and `tar` files.
 
-* Supports multi-stage builds to produce lightweight IoT apps.
+* Supports multi-stage builds to optimize images and produce lightweight IoT apps.
 
 * Only the build envrionment is defined, the execution environment is not defined nor enforced.
 
@@ -161,10 +161,32 @@ Commands are sequences that are executed inside the image or the build environme
 Each command can be any command that refers to a binary or shell command inside the image, beside that there are some
 special commands that will make it easy to automate the build process
 
-* `script`: the script command allows to pass directly a script inside the image and execute it, it is done by bind mounting the script inside the image. This is useful instead of passing multiple sequences of commands; the commands are inside the script file which is executed. The script can be either `bash`, `python` etc.
+During the `installs` phase, commands are executed inside the image environment that was named by the `name` field.
+During other build stages, commands are executed inside the image environment that was specified by the `use` field.
 
-    * `script` syntax: the `script` command syntax is: `[ "script", "scriptfile", "/bin/scriptfile" ]`, where the first element is the command, the second element is the script file location, and last one which is optional is where to make it available inside the image. Usually copying it into `/bin/` inside image is enough which is the default operation anyway if the third element is not specified.
 
+* `script`: the script command allows to pass directly a script inside the image and execute it, it is done by bind mounting the script inside the image. This is useful instead of passing multiple sequences of commands; the commands are inside the script file which is executed. The script can be either `bash`, `python` etc. Please note that the script will not be copied inside the image.
+
+    * `script` syntax: the `script` command syntax is: `[ "script", "scriptfile", "/bin/scriptfile" ]`
+    
+        * `"script"`: first element is the command.
+        
+        * `"scriptfile"`: the second element is the script file location on the host file system.
+        
+        * `"/bin/scriptfile"`: last element is optional. Specify where to make the script available inside the image. Usually using `/bin/` inside image is enough which is the default operation anyway if the third element is not specified.
+
+
+* `copy`: the copy command allows to copy files and directories between multiple images and local file system. Internally it invokes the Unix `cp` command with `-a` as argument so directories are copied recursively with permissions preserved if possible. For further details [cp manual](https://linux.die.net/man/1/cp)
+
+    * `copy` syntax: the `copy` command syntax is: `["copy", "--from=image-name", "source", "destination" ]
+
+        * `"copy"`: first element is the command.
+
+        * `"--from=image-name"`: second element is optional and allows to copy files and directories from other images and build envrionments to perform multi-stage builds. The `image-name` must be a `name` field of one of the images that were installed during the `installs` phase.
+
+        * `"source"`: specifies the source files or directories to be copied from host or another image into the target image name that was specified inside the `use` field.
+
+        * `"destination"`: specifies the destination inside the image environment where to copy the files or directories.
 
 
 ## Install

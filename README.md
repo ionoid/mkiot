@@ -119,16 +119,17 @@ artifacts:
 
 * `phases`: Represents the different phases of a build. This is a required field must contain the `installs` phase and at least one of the `pre-builds`, `builds` or `post-builds` phases.
 
-    * `installs`: a list of different images to install tht are necessary to build and produce the application artifact.
-    * This should be used to only download images or use the ones from the cache to install packages.
+    * `installs`: a list of different images to install that are necessary to build and produce the application artifact. This should be used to only download images or use the ones from the cache to install packages.
 
         * `image`: required field in `installs` contains the base distribution name to use as a file system for the application.
 
         * `mirror`: optional field to define the mirror where to download the distribution from.
 
         * `release`: optional field to define the release code name of distribution to use.
+        
+        * `name`: required field to define how to name the directory that contains the downloaded distribtion or the one that was copied from cache.
 
-        * `cache`: optional field to specify how to use the cache. Possible values are `save`, `reuse` or both separated by `,`. Save means after finishing downloading this image and executing the commands save it into cache for future usage. Reuse means if this image is in the cache do not download it again and just copy it to the `build-directory` and use it.
+        * `cache`: optional field to specify how to use the cache. Possible values are `save`, `reuse` or both separated by `,`. Save means after finishing downloading this image and executing the commands save it into cache for future usage. Reuse means if this image is in the cache do not download it again and just copy it into the `build-directory` and use it.
 
         * `commands`: optional sequence of commands with their arguments that are executed according to their order. Command example: `["/bin/echo", "hello"]`.
 
@@ -151,6 +152,13 @@ artifacts:
         * `commands`: optional sequence of commands with their arguments that are executed according to their order. Command example: `["/bin/echo", "hello"]`.
 
 
+* `artifacts`: required field that specifies how to produce the final artifacts. All produced artifacts can be found inside the `$build-directory/artifacts/` directory.
+
+    * `use`: the name of the image to use. It has to be the `name` field of one of the images that were installed during the `installs` phase.
+
+    * `name`: required field to define how to name the final artifact that contains the build output.
+
+    * `compression`: specifies the archive and compression format to use, by default it uses the `tar archive` format.
 
 
 ### Build specs extra documentation
@@ -176,7 +184,7 @@ During other build stages, commands are executed inside the image environment th
         * `"/bin/scriptfile"`: last element is optional. Specify where to make the script available inside the image. Usually using `/bin/` inside image is enough which is the default operation anyway if the third element is not specified.
 
 
-* `copy`: the copy command allows to copy files and directories between multiple images and local file system. Internally it invokes the Unix `cp` command with `-a` as argument so directories are copied recursively with permissions preserved if possible. For further details [cp manual](https://linux.die.net/man/1/cp)
+* `copy`: the copy command allows to copy files and directories between multiple images and local file system. Internally it invokes the Unix `cp` command with `-a` as argument so directories are copied recursively with permissions preserved if possible. For further details please read [cp manual](https://linux.die.net/man/1/cp).
 
     * `copy` syntax: the `copy` command syntax is: `["copy", "--from=image-name", "source", "destination" ]
 

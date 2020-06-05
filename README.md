@@ -114,7 +114,7 @@ artifacts:
 
 * `arch`: required fields represents the target board architecture. Possible values are: `i386`, `amd64`, `armhf` and `arm64`.
 
-* `build-directory`: required field represents the location where to produce builds.
+* `build-directory`: the location where to reproduce builds. If not set default location will be `mkiot-output` in the current directory.
 
 * `env`: optional field contains environment variables that are passed to all commands of the buildpsec. The environment variables are inside `variables` as keys and values.
 
@@ -161,6 +161,8 @@ artifacts:
 
     * `name`: required field to define how to name the final artifact that contains the build output.
     
+    * `suffix`: optional field that will be appended to the name of the final artifact. This can be a bash command where the output is the `suffix`.
+
     * `commands`: optional sequence of commands with their arguments that are executed according to their order. Command example: `["/bin/echo", "hello"]`. This can be used to copy files and directories into the final artifacts. As an example an `app.yaml` file that defines how to run the application.
 
     * `files`: optional sequence of files and directories that are copied from the host file system into the final artifact. First element is the file or directory location on the host, and second element is where to copy the files or directories inside the artifact.

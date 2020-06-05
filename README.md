@@ -153,13 +153,16 @@ artifacts:
 
 
 
-* Commands:
+### Build specs extra documentation
+        
+#### Commands
 
-Are sequence of commands that are executed inside the image or the build environment one at a time, in the order listed.
-The command can be any command that refers to a binary or shell command inside the image, beside that there are some
+Commands are sequences that are executed inside the image or the build environment one at a time, in the order listed.
+Each command can be any command that refers to a binary or shell command inside the image, beside that there are some
 special commands that will make it easy to automate the build process:
 
     * `script`: the script command allows to pass directly a script inside the image and execute it, it is done by bind mounting the script inside the image. This is useful instead of passing multiple sequences of commands; the commands are inside the script file which is executed. The script can be either `bash`, `python` etc.
+
     * `script` syntax: the `script` command syntax is: `[ "script", "scriptfile", "/bin/scriptfile" ]`, where the first element is the command, the second element is the script file location, and last one which is optional is where to make it available inside the image. Usually copying it into `/bin/` inside image is enough which is the default operation anyway if the third element is not specified.
 
 

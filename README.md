@@ -13,7 +13,7 @@ Internally It uses `debootstrap` and other classic Linux tools. `mkiot` provides
 
 * Supports multi-stage builds to produce lightweight IoT apps.
 
-* Only the build envrionment is defined, the runnin or execution environment is not defined.
+* Only the build envrionment is defined, the execution environment is not defined nor enforced.
 
 
 ### Build Spec syntax
@@ -51,7 +51,7 @@ phases:
         installs:
                 - image: debian
                   mirror: http://deb.debian.org/debian/
-                  release: stretch
+                  release: buster
                   name: debian-armhf-dev
                   cache: "save,reuse"
                   install-args:
@@ -115,12 +115,20 @@ artifacts:
 
 * `env`: optional field contains environment variables that are passed to all commands of the buildpsec. The environment variables are inside `variables` as keys and values.
 
-* `cache`: optional cache where to find previous images that were downloaded and cached. This allows to not download images again.
+* `cache`: optional cache where to find previous images that were downloaded and cached. This allows to not download images again. By default it is set to `/var/lib/mkiot/images/cache/`.
 
-* `phases`: Represents the different phases of a build. Required field must contain `installs` phase and at least one of the `pre-builds`, `builds` or `post-builds` phases.
+* `phases`: Represents the different phases of a build. This is a required field must contain the `installs` phase and at least one of the `pre-builds`, `builds` or `post-builds` phases.
 
     * `installs`: a list of different images to install to build the application. This should be used to only download images, use the ones from the cache and install packages for the build environment.
-    
+
+        * `image`: required field in `installs` contains the base distribution name to use as a file system for the application.
+
+        * `mirror`: optional field to define the mirror where to download the distribution from.
+
+        * `release`: optional field to define the release code name of distribution to use.
+
+        * `cache`: optional field to specify how to use the cache. Possible values are `save`, `reuse` or both separated by `,`. Save means after finishing downloading this image and executing the commands save it into cache for future usage. Reuse means if this image is in the cache do not download it again and just copy it to the `build-directory` and use it.
+
 
 
 ## Install

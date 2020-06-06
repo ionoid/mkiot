@@ -196,7 +196,7 @@ artifacts:
 
     * `use`: the name of the image to use. It has to be the `name` field of one of the images that were installed during the `installs` phase.
 
-    * `name`: required field to define how to name the final artifact that contains the build output.
+    * `name`: optional field that contains the name the final artifact. If not set it will use the same name of the field `use`.
     
     * `suffix`: optional field that will be appended to the name of the final artifact. This can be a bash command where the output is the `suffix`.
 

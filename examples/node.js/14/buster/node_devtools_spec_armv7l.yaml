@@ -18,21 +18,20 @@ phases:
                   install-args:
                   runtime-versions:
                   commands:
-                        - echo Installed debian buster
-                        - apt-get update
+                        - ["echo", "Installed debian buster" ]
+                        - ["apt-get", "update" ]
 
 
         builds:
                 # Set what image to use from installs
                 - use: node-14.2.0_devtools_debian-buster_armhf
                   commands:
-                        - script node-install.sh
-                        - rm -rf /var/lib/apt/lists/*
-                        - rm -rf /var/cache/apt/archives/partial/
-                        - echo Installed node $NODE_VERSION buster
+                        - ["script", "node-install.sh"]
+                        - ["rm", "-rf", "/var/lib/apt/lists/*"]
+                        - ["rm", "-rf", "/var/cache/apt/archives/partial/" ]
+                        - ["echo", "Installed node $NODE_VERSION buster" ]
 
 artifacts:
-        - name: node-14.2.0_devtools_debian-buster_armhf
-          files:
-                - node-14.2.0_devtools_debian-buster_armhf
+        - use: node-14.2.0_devtools_debian-buster_armhf
+          name: node-14.2.0_devtools_debian-buster_armhf
           compression: tar

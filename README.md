@@ -1,11 +1,10 @@
-# Make IoT - Build IoT Apps
+# Make IoT - Build Edge and IoT Apps
 
 A wrapper around `debootstrap` to build lightweight IoT Apps.
 
+## Introduction
 
-## Build Spec
-
-`mkiot` make it simple to build IoT apps artifacts that are ready to be deployed to IoT devices.
+`mkiot` makes it simple to build IoT apps artifacts that are ready to be deployed to Edge or IoT devices.
 
 Internally It uses `debootstrap` and other classic Linux tools. `mkiot` provides these benefits:
 
@@ -16,9 +15,47 @@ Internally It uses `debootstrap` and other classic Linux tools. `mkiot` provides
 * Only the build envrionment is defined, the execution environment is not defined nor enforced.
 
 
-### Build Spec syntax
+## Install
 
-Build specs are expressed in [YAML](https://yaml.org) format.
+`mkiot` needs the following packages `qemu`, `qemu-user-static`, `binfmt-support`, `systemd-nspawn`, `deboostrap` and
+`python yq package and tool`.
+
+
+To install the necessary dependencies on `debian` or `ubuntu`:
+
+- qemu qemu-user-static
+```bash
+        sudo apt-get install qemu qemu-user-static
+```
+
+- binfmt-support
+```bash
+        sudo apt-get install binfmt-support
+```
+
+- systemd-container or systemd-nspawn
+```bash
+        sudo apt-get install systemd-container
+```
+
+- deboostrap
+```bash
+        sudo apt-get install debootstrap
+```
+
+- yq: Command-line YAML/XML processor  https://kislyuk.github.io/yq/
+```bash
+        pip install yq
+```
+
+
+Of course it needs other tools that should be installed: "python, bash, tar, zip"
+
+
+## Build Spec syntax
+
+`mkiot` use build specs that are expressed in [YAML](https://yaml.org) format to define how to build the application
+image.
 
 If a field contains a character, or a string of characters, that is not supported by YAML,
 you must enclose the command in quotation marks (""). The following command is enclosed in
@@ -30,7 +67,7 @@ The quotation mark in the command is escaped (\"). [1] Reference.
 ```
 
 
-IoT buildspec format:
+Buildspec format:
 
 ```yaml
 version: 0.1
@@ -124,7 +161,7 @@ artifacts:
 
     * `installs`: a list of different images to install that are necessary to build and produce the application artifact. This should be used to only download images or use the ones from the cache to install packages.
 
-        * `image`: required field in `installs` contains the base distribution name to use as a file system for the application.
+        * `image`: required field in `installs` contains the base distribution name to use as a file system for the application. Current supported values are `debian`, `scratch` for empty file system.
 
         * `mirror`: optional field to define the mirror where to download the distribution from.
 
@@ -170,9 +207,7 @@ artifacts:
     * `compression`: specifies the archive and compression format to use, by default it uses the `tar archive` format.
 
 
-### Build specs extra documentation
-        
-#### Commands
+### Build spec commands documentation
 
 Commands are sequences that are executed inside the image or the build environment one at a time, in the order listed.
 Each command can be any command that refers to a binary or shell command inside the image, beside that there are some
@@ -205,47 +240,6 @@ During other build stages, commands are executed inside the image environment th
 
         * `"destination"`: specifies the destination inside the image environment where to copy the files or directories.
 
-
-## Install
-
-mkiot needs the following packages:
-
-- qemu qemu-user-static
-```bash
-        sudo apt-get install qemu qemu-user-static
-
-
-## Install
-
-mkiot needs the following packages:
-
-- qemu qemu-user-static
-```bash
-        sudo apt-get install qemu qemu-user-static
-```
-
-- binfmt-support
-```bash
-        sudo apt-get install binfmt-support
-```
-
-- systemd-container or systemd-nspawn
-```bash
-        sudo apt-get install systemd-container
-```
-
-- deboostrap
-```bash
-        sudo apt-get install debootstrap
-```
-
-- yq: Command-line YAML/XML processor  https://kislyuk.github.io/yq/
-```bash
-        pip install yq
-```
-
-
-Of course it needs other tools that should be installed: "python, bash, tar, zip"
 
 
 ## References

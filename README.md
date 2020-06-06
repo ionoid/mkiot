@@ -155,7 +155,7 @@ artifacts:
 
 * `env`: optional field contains environment variables that are passed to all commands of the buildpsec. The environment variables are inside `variables` as keys and values.
 
-* `cache`: optional cache where to find previous images that were downloaded and cached. This allows to not download images again. By default it is set to `/var/lib/mkiot/images/cache/`.
+* `cache`: optional cache where to find previous images that were downloaded and cached. By default it is set to `/var/lib/mkiot/images/cache/`. Please do not set this unless you know what you are doing, in this case you have to cleanup the cache manually. Images inside the default cache folder `/var/lib/mkiot/images/cache/` that are older than 60 days will be removed next `mkiot` run.
 
 * `phases`: Represents the different phases of a build. This is a required field must contain the `installs` phase and at least one of the `pre-builds`, `builds` or `post-builds` phases.
 
@@ -169,7 +169,7 @@ artifacts:
         
         * `name`: required field to define how to name the directory that contains the downloaded distribtion or the one that was copied from cache.
 
-        * `cache`: optional field to specify how to use the cache. Possible values are `save`, `reuse` or both separated by `,`. Save means after finishing downloading this image and executing the commands save it into cache for future usage. Reuse means if this image is in the cache do not download it again and just copy it into the `build-directory` and use it.
+        * `cache`: optional field to specify how to use the cache. Possible values are `save`, `reuse` or both separated by `,`. Save means after finishing downloading this image and executing the commands save it into cache for future usage, overwriting any previous saved image that has same `name` field. Reuse means if this image is in the cache do not download it again and just copy it into the `build-directory` and use it.
 
         * `commands`: optional sequence of commands with their arguments that are executed according to their order. Command example: `["/bin/echo", "hello"]`.
 

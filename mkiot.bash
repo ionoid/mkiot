@@ -117,10 +117,10 @@ if [ -z "$ARCH" ]; then
         ARCH=$(get_yaml_value "$BUILDSPEC" "arch")
 fi
 
-export BASE_DIRECTORY=$(get_yaml_value "$BUILDSPEC" "\"base-directory\"")
-if [ -z "$BASE_DIRECTORY" ]; then
-        info "'base-directory' of build output not set, using './output/'"
-        export BASE_DIRECTORY="output/"
+export BUILD_DIRECTORY=$(get_yaml_value "$BUILDSPEC" "\"build-directory\"")
+if [ -z "$BUILD_DIRECTORY" ] || [ "$BUILD_DIRECTORY" == "null" ]; then
+        info "'build-directory' of build output not set, using './mkiot-output/'"
+        export BUILD_DIRECTORY="mkiot-output/"
 fi
 
 if [ -z "$ARCH" ] || [ "$ARCH" == "null" ]; then
@@ -176,6 +176,29 @@ export CHROOT_CONTAINER=$(which systemd-nspawn)
 
 time="$(date +%F_%H%M%S)"
 
+run_artifacts_commands() {
+        export ROOTFS="$1"
+        local idx="$2"
+
+        local cmds=$(get_yaml_value "$BUILDSPEC" "$(printf %s "artifacts | .[$idx].commands")")
+        if [ "$cmds" != "null" ]; then
+
+                # Walk now command instructions and run them
+                for comsidx in {0..40}
+                do
+                        local cmdline=$(get_yaml_value "$BUILDSPEC" "$(printf %s "artifacts | .[$idx].commands[$comsidx]")")
+                        if [ "$cmdline" == "null" ]; then
+                                break
+                        fi
+
+                        (
+                                set -x
+                                run_yaml_commands $cmdline
+                        )
+                done
+        fi
+}
+
 run_commands() {
         # update ROOTFS here
         export ROOTFS="$1"
@@ -193,12 +216,7 @@ run_commands() {
 
                 (
                         set -x
-                        # expand cmdline on purpose
-                        if [ -z "$shell" ] || [ "$shell" == "null" ]; then
-                                run_yaml_commands $cmdline
-                        else
-                                run_yaml_commands "--shell=$shell" $cmdline
-                        fi
+                        run_yaml_commands $cmdline
                 )
         done
 }
@@ -235,8 +253,8 @@ run_phases_installs() {
                 fatal "'phases.installs[$idx].mirror' for image '$BASE_IMAGE' is not set in buildspec and no default value"
         fi
 
-        mkdir -p ${BASE_DIRECTORY}
-        chown ${user}.${user} ${BASE_DIRECTORY}
+        mkdir -p ${BUILD_DIRECTORY}
+        chown ${user}.${user} ${BUILD_DIRECTORY}
 
         export INSTALLS_NAME=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].name")")
         if [ -z "$INSTALLS_NAME" ]; then
@@ -249,23 +267,23 @@ run_phases_installs() {
                 install_args=""
         fi
 
-        info "phases.installs[$idx] OS '$BASE_IMAGE' into 'image=${BASE_DIRECTORY}/${INSTALLS_NAME}'"
+        info "phases.installs[$idx] OS '$BASE_IMAGE' into 'image=${BUILD_DIRECTORY}/${INSTALLS_NAME}'"
 
         local reuse="false"
         local saveincache="false"
         local cache=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].cache")")
         if [ -z "$cache" ] || [ "$cache" == "null" ]; then
-                info "removing image '${BASE_DIRECTORY}/${INSTALLS_NAME}', \
+                info "removing image '${BUILD_DIRECTORY}/${INSTALLS_NAME}', \
                         set 'cache: \"reuse\" to reuse old images"
-                rm -fr -- "${BASE_DIRECTORY}/${INSTALLS_NAME}"
+                rm -fr -- "${BUILD_DIRECTORY}/${INSTALLS_NAME}"
         elif [[ "$cache" == *"reuse"* ]]; then
                 reuse="true"
                 if [ -d "${IMAGES_CACHE}/${INSTALLS_NAME}" ]; then
-                        rm -fr -- "${BASE_DIRECTORY}/${INSTALLS_NAME}"
+                        rm -fr -- "${BUILD_DIRECTORY}/${INSTALLS_NAME}"
                         info "Cache found image install at '${IMAGES_CACHE}/${INSTALLS_NAME}'"
-                        info "Copying image from cache to '${BASE_DIRECTORY}/${INSTALLS_NAME}'"
-                        cp -dfR --preserve=all "${IMAGES_CACHE}/${INSTALLS_NAME}" "${BASE_DIRECTORY}/${INSTALLS_NAME}/"
-                        chown ${user}.${user} "${BASE_DIRECTORY}/${INSTALLS_NAME}"
+                        info "Copying image from cache to '${BUILD_DIRECTORY}/${INSTALLS_NAME}'"
+                        cp -dfR --preserve=all "${IMAGES_CACHE}/${INSTALLS_NAME}" "${BUILD_DIRECTORY}/${INSTALLS_NAME}/"
+                        chown ${user}.${user} "${BUILD_DIRECTORY}/${INSTALLS_NAME}"
                 else
                         # Image was not found so lets recreate it
                         reuse="false"
@@ -275,7 +293,7 @@ run_phases_installs() {
         fi
 
         if [ "$reuse" == "false" ]; then
-                local builddir="$(mktemp -d ${BASE_DIRECTORY}/${INSTALLS_NAME}.XXXXXXXXXXX.tmp)"
+                local builddir="$(mktemp -d ${BUILD_DIRECTORY}/${INSTALLS_NAME}.XXXXXXXXXXX.tmp)"
                 export ROOTFS="$builddir"
                 (
 	                set -x
@@ -287,7 +305,7 @@ run_phases_installs() {
 
                 echo
                 info "Building with: 'buildspec=$BUILDSPEC' phases.installs[$idx] 'arch=$ARCH' 'image=$BASE_IMAGE' 'release=$BASE_IMAGE_RELEASE' \
-'base-directory=$BASE_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args=$install_args $build_args'"
+'build-directory=$BUILD_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args=$install_args $build_args'"
 
                 if [[ "$BASE_IMAGE_MIRROR" == *"ionoid"* ]]; then
                         "${mkiot_path}/mkimage/ionoid-bootstrap.bash" --arch="$ARCH" "$install_args" "$build_args"
@@ -304,27 +322,27 @@ run_phases_installs() {
                 # Make sure to point back rootfs to INSTALLS_NAME,
                 # it will be picked later by next phases
                 #
-                mv -f "$ROOTFS" "${BASE_DIRECTORY}/${INSTALLS_NAME}"
+                mv -f "$ROOTFS" "${BUILD_DIRECTORY}/${INSTALLS_NAME}"
 
         else
                 echo
                 info "Reusing image: phases.installs[$idx] 'arch=$ARCH' 'image=$BASE_IMAGE' 'release=$BASE_IMAGE_RELEASE' \
-'base-directory=$BASE_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args="
-                if [ ! -d "${BASE_DIRECTORY}/${INSTALLS_NAME}" ]; then
-                        fatal "Image '${BASE_DIRECTORY}/${INSTALLS_NAME} not found!"
+'build-directory=$BUILD_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args="
+                if [ ! -d "${BUILD_DIRECTORY}/${INSTALLS_NAME}" ]; then
+                        fatal "Image '${BUILD_DIRECTORY}/${INSTALLS_NAME} not found!"
                 fi
         fi
 
         local shell=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].shell")")
 
         # Lets run commands from the installs phase
-        run_commands "${BASE_DIRECTORY}/${INSTALLS_NAME}" ".installs" "$idx" "$shell"
+        run_commands "${BUILD_DIRECTORY}/${INSTALLS_NAME}" ".installs" "$idx" "$shell"
 
-        info "phases.installs[$idx] finished, image location: ${BASE_DIRECTORY}/${INSTALLS_NAME}"
+        info "phases.installs[$idx] finished, image location: ${BUILD_DIRECTORY}/${INSTALLS_NAME}"
 
         if [[ "$cache" == *"save"* ]]; then
-                info "Cache saving '${BASE_DIRECTORY}/${INSTALLS_NAME} into cache ${IMAGES_CACHE}"
-                cp -dfR --preserve=all "${BASE_DIRECTORY}/${INSTALLS_NAME}" "${IMAGES_CACHE}/${INSTALLS_NAME}.tmp/"
+                info "Cache saving '${BUILD_DIRECTORY}/${INSTALLS_NAME} into cache ${IMAGES_CACHE}"
+                cp -dfR --preserve=all "${BUILD_DIRECTORY}/${INSTALLS_NAME}" "${IMAGES_CACHE}/${INSTALLS_NAME}.tmp/"
                 rm -fr -- "${IMAGES_CACHE}/${INSTALLS_NAME}"
                 mv -f "${IMAGES_CACHE}/${INSTALLS_NAME}.tmp" "${IMAGES_CACHE}/${INSTALLS_NAME}"
                 chown root.root "${IMAGES_CACHE}/${INSTALLS_NAME}"
@@ -345,14 +363,14 @@ run_phases_pre_builds() {
                 use_image=$INSTALLS_NAME
         fi
 
-        info "phases.pre-builds[$idx] started on 'image=${BASE_DIRECTORY}/${use_image}'"
+        info "phases.pre-builds[$idx] started on 'image=${BUILD_DIRECTORY}/${use_image}'"
 
         local shell=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases[\"pre-builds\"] | .[$idx].shell")")
 
         # Lets run commands from the installs phase
-        run_commands "${BASE_DIRECTORY}/${use_image}" "[\"pre-builds\"]" "$idx" "$shell"
+        run_commands "${BUILD_DIRECTORY}/${use_image}" "[\"pre-builds\"]" "$idx" "$shell"
 
-        info "phases.pre-builds[$idx] finished, image location: ${BASE_DIRECTORY}/${use_image}"
+        info "phases.pre-builds[$idx] finished, image location: ${BUILD_DIRECTORY}/${use_image}"
         echo
 }
 
@@ -366,14 +384,14 @@ run_phases_builds() {
                 use_image=$INSTALLS_NAME
         fi
 
-        info "phases.builds[$idx] started on 'image=${BASE_DIRECTORY}/${use_image}'"
+        info "phases.builds[$idx] started on 'image=${BUILD_DIRECTORY}/${use_image}'"
 
         local shell=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.builds | .[$idx].shell")")
 
         # Lets run commands from the installs phase
-        run_commands "${BASE_DIRECTORY}/${use_image}" ".builds" "$idx"
+        run_commands "${BUILD_DIRECTORY}/${use_image}" ".builds" "$idx"
 
-        info "phases.builds[$idx] finished, image location: ${BASE_DIRECTORY}/${use_image}"
+        info "phases.builds[$idx] finished, image location: ${BUILD_DIRECTORY}/${use_image}"
         echo
 }
 
@@ -387,14 +405,14 @@ run_phases_post_builds() {
                 use_image=$INSTALLS_NAME
         fi
 
-        info "phases.post-builds[$idx] started on 'image=${BASE_DIRECTORY}/${use_image}'"
+        info "phases.post-builds[$idx] started on 'image=${BUILD_DIRECTORY}/${use_image}'"
 
         local shell=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases[\"post-builds\"] | .[$idx].shell")")
 
         # Lets run commands from the installs phase
-        run_commands "${BASE_DIRECTORY}/${use_image}" "[\"post-builds\"]" "$idx"
+        run_commands "${BUILD_DIRECTORY}/${use_image}" "[\"post-builds\"]" "$idx"
 
-        info "phases.post-builds[$idx] finished, image location: ${BASE_DIRECTORY}/${use_image}"
+        info "phases.post-builds[$idx] finished, image location: ${BUILD_DIRECTORY}/${use_image}"
         echo
 }
 
@@ -429,11 +447,16 @@ compress_artifact() {
 
 generate_artifact() {
         local idx="$1"
-        export ARTIFACTS_NAME="$2"
-        export ARTIFACTS_BASE_DIRECTORY="$BASE_DIRECTORY/artifacts/"
+        local ARTIFACTS_USE="$2"
+        local ARTIFACTS_BUILD_DIRECTORY="$BUILD_DIRECTORY/artifacts/"
 
-        mkdir -p ${ARTIFACTS_BASE_DIRECTORY}
-        chown ${user}.${user} ${ARTIFACTS_BASE_DIRECTORY}
+        mkdir -p ${ARTIFACTS_BUILD_DIRECTORY}
+        chown ${user}.${user} ${ARTIFACTS_BUILD_DIRECTORY}
+
+        local ARTIFACTS_NAME=$(get_yaml_value "$BUILDSPEC" "$(printf %s "artifacts | .[$idx].name")")
+        if [ -z "$ARTIFACTS_NAME" ] || [ "$ARTIFACTS_NAME" == "null" ]; then
+                fatal "Generate artifact [$idx] 'use=$ARTIFACTS_USE' 'name' field file name of artifact is not set in buildspec"
+        fi
 
         (
                 set -e
@@ -451,9 +474,15 @@ generate_artifact() {
         # Setup final artifact base directory
 
         local artifact="${ARTIFACTS_NAME}"
-        rm -fr "${ARTIFACTS_BASE_DIRECTORY}/${artifact}"
-        mkdir -p "${ARTIFACTS_BASE_DIRECTORY}/${artifact}"
+        rm -fr "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}"
 
+        info "Generating artifact '$ARTIFACTS_NAME' copying 'use=${ARTIFACTS_USE}' into 'name=${ARTIFACTS_BUILD_DIRECTORY}/${artifact}'"
+        cp -dfR --preserve=all "${BUILD_DIRECTORY}/${ARTIFACTS_USE}" "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}"
+
+        info "Running artifact '${ARTIFACTS_BUILD_DIRECTORY}/${artifact}' commands"
+        run_artifacts_commands "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}" "$idx"
+
+        info "Copying artifact files and directories into '${ARTIFACTS_BUILD_DIRECTORY}/${artifact}'"
         for i in {0..20}
         do
                 local file=$(get_yaml_value "$BUILDSPEC" "$(printf %s "artifacts | .[$idx].files[$i]")")
@@ -461,20 +490,20 @@ generate_artifact() {
                         break
                 fi
 
-                if [ -d "${BASE_DIRECTORY}/${file}" ]; then
-                        cp -dfR --preserve=all "${BASE_DIRECTORY}/${file}/." "${ARTIFACTS_BASE_DIRECTORY}/${artifact}"
-                elif [ -f "${BASE_DIRECTORY}/${file}" ]; then
-                        cp -df --preserve=all "${BASE_DIRECTORY}/${file}" "${ARTIFACTS_BASE_DIRECTORY}/${artifact}"
+                if [ -d "${BUILD_DIRECTORY}/${file}" ]; then
+                        cp -dfR --preserve=all "${BUILD_DIRECTORY}/${file}/." "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}"
+                elif [ -f "${BUILD_DIRECTORY}/${file}" ]; then
+                        cp -df --preserve=all "${BUILD_DIRECTORY}/${file}" "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}"
                 else
-                        error "failed to add '${BASE_DIRECTORY}/${file}' to artifact '${artifact}' not supported"
+                        error "failed to add '${BUILD_DIRECTORY}/${file}' to artifact '${artifact}' not supported"
                 fi
         done
 
         local compression=$(get_yaml_value "$BUILDSPEC" "$(printf %s "artifacts | .[$idx].compression")")
 
-        compress_artifact "${ARTIFACTS_BASE_DIRECTORY}" "${compression}" "${artifact}"
+        compress_artifact "${ARTIFACTS_BUILD_DIRECTORY}" "${compression}" "${artifact}"
 
-        rm -fr "${ARTIFACTS_BASE_DIRECTORY}/${artifact}"
+        rm -fr "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}"
 }
 
 ENV_VARS_PARMS=""
@@ -561,13 +590,13 @@ echo
 info "Generating artifacts"
 for i in {0..4}
 do
-        artifacts_name=$(get_yaml_value "$BUILDSPEC" "$(printf %s "artifacts | .[$i].name")")
-        if [ -z "$artifacts_name" ] || [ "$artifacts_name" == "null" ]; then
+        artifacts_use=$(get_yaml_value "$BUILDSPEC" "$(printf %s "artifacts | .[$i].use")")
+        if [ -z "$artifacts_use" ] || [ "$artifacts_use" == "null" ]; then
                 break
         fi
 
-        generate_artifact "$i" "$artifacts_name"
-        artifacts_name="null"
+        generate_artifact "$i" "$artifacts_use"
+        artifacts_use="null"
 done
 
 exit 0

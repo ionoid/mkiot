@@ -1,7 +1,7 @@
 version: 0.1
 
 arch: armhf
-base-directory: output/
+build-directory: output/
 
 phases:
         installs:
@@ -13,22 +13,21 @@ phases:
                   install-args:
                   runtime-versions:
                   commands:
-                        - echo Installed debian buster
-                        - apt-get update
-                        - apt-get install -y --no-install-recommends
-                                build-essential pkg-config
+                        - ["echo", "Installed debian buster" ]
+                        - ["apt-get", "update" ]
+                        - ["apt-get", "install", "-y", "--no-install-recommends",
+                                "build-essential pkg-config
                                 ca-certificates curl netbase wget
                                 git mercurial openssh-client subversion
                                 gnupg dirmngr
-                                procps
-                        - update-ca-certificates
-                        - rm -rf /var/lib/apt/lists/*
-                        - rm -rf /var/cache/apt/archives/partial/
-                        - echo Installed debian build devtools packages
+                                procps" ]
+                        - ["update-ca-certificates" ]
+                        - ["rm", "-rf", "/var/lib/apt/lists/*" ]
+                        - ["rm", "-rf", "/var/cache/apt/archives/partial/" ]
+                        - ["echo", "Installed debian build devtools packages" ]
 
 
 artifacts:
-        - name: devtools_debian-buster_armhf
-          files:
-                - devtools_debian-buster_armhf
+        - use: devtools_debian-buster_armhf
+          name: devtools_debian-buster_armhf
           compression: tar

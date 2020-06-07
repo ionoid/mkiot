@@ -190,8 +190,8 @@ setup_slave_mount() {
         pid1_inode=$(stat -L -c "%i" /proc/1/ns/mnt)
 
         # Unshare -m failed ?
-        if [ "$self_inode" != "$pid1_inode" ]; then
-                fatal "Working on host mount namespace is not allowed."
+        if [ "$self_inode" == "$pid1_inode" ]; then
+                fatal "Working on host mount namespace is not allowed"
         fi
 
         # Lets propagate slave mode
@@ -223,7 +223,7 @@ run_artifacts_commands() {
                 done
         fi
 
-        unmount "${MOUNTED_PATH}"
+        umount "${MOUNTED_PATH}"
 }
 
 run_commands() {
@@ -250,7 +250,7 @@ run_commands() {
                 )
         done
 
-        unmount "${MOUNTED_PATH}"
+        umount "${MOUNTED_PATH}"
 }
 
 run_phases_installs() {
@@ -336,7 +336,7 @@ run_phases_installs() {
                 chown ${user}.${user} ${ROOTFS}
 
                 MOUNTED_PATH="$(realpath "${ROOTFS}")"
-                # Bind mount ROOTFS so we can unmount recursively later
+                # Bind mount ROOTFS so we can umount recursively later
                 mount --bind "${MOUNTED_PATH}" "${MOUNTED_PATH}"
 
                 info "Building with: 'buildspec=$BUILDSPEC' phases.installs[$idx] 'arch=$ARCH' 'image=$BASE_IMAGE' 'release=$BASE_IMAGE_RELEASE' \
@@ -350,11 +350,11 @@ run_phases_installs() {
                         # pass all remaining arguments to $script
                         "${mkiot_path}/mkimage/debootstrap" --arch="$ARCH" "$install_args" "$build_args"
                 else
-                        unmount "${MOUNTED_PATH}"
+                        umount "${MOUNTED_PATH}"
                         fatal "unsupported target image '$BASE_IMAGE'"
                 fi
         
-                unmount "${MOUNTED_PATH}"
+                umount "${MOUNTED_PATH}"
 
                 #
                 # Make sure to point back rootfs to INSTALLS_NAME,

@@ -2,6 +2,8 @@
 
 # Copyright (C) 2020 Open Devices GmbH
 
+buildspec_run="${mkiot_path}/mkimage/buildspec-run.py"
+
 info() {
         >&2 echo -e "Info: ${*}"
 }
@@ -13,6 +15,22 @@ error() {
 fatal() {
         >&2 echo -e "Fatal: ${*}, exiting"
         exit 1
+}
+
+unmount() {
+        local path="$1"
+        umount --recursive -n $path
+}
+
+check_rootfs_inode() {
+        local hostroot="/"
+        local buildroot="$ROOTFS"
+        realroot_inode=$(stat -L -c "%i" "$hostroot")
+        buildroot_inode=$(stat -L -c "%i" "$buildroot")
+
+        if [ "$realroot_inode" == "$buildroot_inode" ]; then
+                fatal "rootfs of build point to real host root"
+        fi
 }
 
 check_program() {
@@ -188,6 +206,13 @@ RUN_SCRIPT() {
 
 }
 
+RUN_YAML_COMMAND() {
+        local rootfs="$1"
+        local section="$2"
+
+
+}
+
 RUN() {
         local shell=""
         for i in "$@"
@@ -244,7 +269,9 @@ tar_artifact() {
         local file="$1"
         local target="$2"
 
-        tar --numeric-owner --create --auto-compress --file "$file" --directory "$target" --transform='s,^./,,' .
+        tar --numeric-owner --create --auto-compress \
+                --xattrs --xattrs-include=* --file "$file" \
+                --directory "$target" --transform='s,^./,,' .
 }
 
 run_yaml_commands() {

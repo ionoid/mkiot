@@ -43,9 +43,12 @@ To install the necessary dependencies on `debian` or `ubuntu`:
         sudo apt-get install debootstrap
 ```
 
-- yq: Command-line YAML/XML processor  https://kislyuk.github.io/yq/
+- Python packages:
+    - yq: Command-line YAML/XML processor. [yq Link](https://kislyuk.github.io/yq/).
+    - pyyaml: PyYAML is a YAML parser and emitter for Python. [PyYaml Link](https://github.com/yaml/pyyaml).
 ```bash
         pip install yq
+        pip install pyyaml
 ```
 
 
@@ -240,6 +243,8 @@ During other build stages, commands are executed inside the image environment th
 
         * `"destination"`: specifies the destination inside the image environment where to copy the files or directories.
 
+
+## Examples
 
 
 ## References

@@ -51,7 +51,7 @@ else
         info "Downloading '${URL} into ${BASE_DIRECTORY}/${tmpfile}'"
         wget -O "${tmpfile}" "${URL}"
 
-        tar -xf "${tmpfile}" -C $ROOTFS
+        tar -xf "${tmpfile}" -C "${ROOTFS}"
         rm -fr "${tmpfile}"
 
         cd $cpwd

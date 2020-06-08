@@ -149,7 +149,7 @@ COPY() {
 
         # Copy from another image build
         if [ -n "$from" ]; then
-                src="$BASE_DIRECTORY/$from/$src"
+                src="$BUILD_DIRECTORY/$from/$src"
         fi
 
         cp -dfR --preserve=all "$(realpath $src)" "$ROOTFS/$dst"
@@ -178,7 +178,7 @@ RUN_SCRIPT() {
 
         # Copy from another image build
         if [ -n "$from" ]; then
-                script="${BASE_DIRECTORY}/${from}/${script}"
+                script="${BUILD_DIRECTORY}/${from}/${script}"
         fi
 
         if [ ! -f "$script" ]; then

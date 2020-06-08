@@ -13,16 +13,16 @@ if [ "$(id -u)" -ne "0" ]; then
         exit 1
 fi
 
-if [ ! -r "${mkiot_path}/mkimage/build-helpers.bash" ] ; then
-        export mkiot_path="/usr/lib/mkiot/"
+if [ ! -r "${mkiot_path}/build-helpers.bash" ] ; then
+        export mkiot_path="/usr/lib/mkiot/mkimage/"
 fi
 
-if [ ! -r "${mkiot_path}/mkimage/build-helpers.bash" ] ; then
-        >&2 echo "Error: failed to load '${mkiot_path}/mkimage/build-helpers.bash'"
+if [ ! -r "${mkiot_path}/build-helpers.bash" ] ; then
+        >&2 echo "Error: failed to load '${mkiot_path}/build-helpers.bash'"
         exit 1
 fi
 
-. ${mkiot_path}/mkimage/build-helpers.bash
+. ${mkiot_path}/build-helpers.bash
 
 usage() {
 	echo >&2 "usage: $mkiot build buildspec.yaml"
@@ -202,6 +202,9 @@ run_artifacts_commands() {
         export ROOTFS="$1"
         local idx="$2"
 
+        # Make sure of working space
+        check_rootfs_inode
+
         MOUNTED_PATH="$(realpath "${ROOTFS}")"
         mount --bind "${MOUNTED_PATH}" "${MOUNTED_PATH}"
 
@@ -233,6 +236,12 @@ run_commands() {
         local idx="$3"
         local shell="$4"
 
+        # Make sure of working space
+        check_rootfs_inode
+
+        # Run Yaml commands
+        "${mkiot_path}/buildspec-run.py" --rootfs="$ROOTFS" \
+                --buildspec="$BUILDSPEC" --field "p" "$build_args"
         MOUNTED_PATH="$(realpath "${ROOTFS}")"
         mount --bind "${MOUNTED_PATH}" "${MOUNTED_PATH}"
 
@@ -260,7 +269,7 @@ run_phases_installs() {
 
         if [ "$BASE_IMAGE" == "debian" ] || [ "$BASE_IMAGE" == "scratch" ]; then
                 # Set default release mirror values
-                . ${mkiot_path}/mkimage/$BASE_IMAGE/install
+                . ${mkiot_path}/$BASE_IMAGE/install
                 export BASE_IMAGE_RELEASE="${release}"
                 export BASE_IMAGE_MIRROR="${mirror}"
         fi
@@ -299,7 +308,7 @@ run_phases_installs() {
                 install_args=""
         fi
 
-        info "phases.installs[$idx] OS '$BASE_IMAGE' into 'image=${BUILD_DIRECTORY}/${INSTALLS_NAME}'"
+        info "phases.installs[$idx] parent image '$BASE_IMAGE' into 'image=${BUILD_DIRECTORY}/${INSTALLS_NAME}'"
 
         local reuse="false"
         local saveincache="false"
@@ -314,7 +323,7 @@ run_phases_installs() {
                         rm -fr -- "${BUILD_DIRECTORY}/${INSTALLS_NAME}"
                         info "Cache found image install at '${IMAGES_CACHE}/${INSTALLS_NAME}'"
                         info "Copying image from cache to '${BUILD_DIRECTORY}/${INSTALLS_NAME}'"
-                        cp -dfR --preserve=all "${IMAGES_CACHE}/${INSTALLS_NAME}" "${BUILD_DIRECTORY}/${INSTALLS_NAME}/"
+                        cp -dfRT --preserve=all "${IMAGES_CACHE}/${INSTALLS_NAME}" "${BUILD_DIRECTORY}/${INSTALLS_NAME}/"
                         chown ${user}.${user} "${BUILD_DIRECTORY}/${INSTALLS_NAME}"
                 else
                         # Image was not found so lets recreate it
@@ -327,11 +336,16 @@ run_phases_installs() {
         if [ "$reuse" == "false" ]; then
                 local builddir="$(mktemp -d ${BUILD_DIRECTORY}/${INSTALLS_NAME}.XXXXXXXXXXX.tmp)"
                 export ROOTFS="$builddir"
+
+                # Make sure of working space
+                check_rootfs_inode
+
                 (
 	                set -x
 	                mkdir -p "$ROOTFS"
                 )
 
+                echo $OOTFS
                 mkdir -p ${ROOTFS}
                 chown ${user}.${user} ${ROOTFS}
 
@@ -340,15 +354,15 @@ run_phases_installs() {
                 mount --bind "${MOUNTED_PATH}" "${MOUNTED_PATH}"
 
                 info "Building with: 'buildspec=$BUILDSPEC' phases.installs[$idx] 'arch=$ARCH' 'image=$BASE_IMAGE' 'release=$BASE_IMAGE_RELEASE' \
-'build-directory=$BUILD_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args=$install_args $build_args'"
+'build-directory=$BUILD_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args=${install_args} ${build_args}'"
 
                 if [[ "$BASE_IMAGE_MIRROR" == *"ionoid"* ]]; then
-                        "${mkiot_path}/mkimage/ionoid-bootstrap.bash" --arch="$ARCH" "$install_args" "$build_args"
+                        "${mkiot_path}/ionoid-bootstrap.bash" --arch="$ARCH" "$install_args" "$build_args"
                 elif [ "$BASE_IMAGE" == "scratch" ]; then
-                        "${mkiot_path}/mkimage/ionoid-bootstrap.bash"
+                        "${mkiot_path}/ionoid-bootstrap.bash"
                 elif [ "$BASE_IMAGE" == "debian" ]; then
                         # pass all remaining arguments to $script
-                        "${mkiot_path}/mkimage/debootstrap" --arch="$ARCH" "$install_args" "$build_args"
+                        "${mkiot_path}/debootstrap" --arch="$ARCH" "$install_args" "$build_args"
                 else
                         umount "${MOUNTED_PATH}"
                         fatal "unsupported target image '$BASE_IMAGE'"
@@ -358,13 +372,14 @@ run_phases_installs() {
 
                 #
                 # Make sure to point back rootfs to INSTALLS_NAME,
-                # it will be picked later by next phases
+                # it will be picked later by next phases and also treat
+                # target as a file
                 #
-                mv -f "$ROOTFS" "${BUILD_DIRECTORY}/${INSTALLS_NAME}"
+                mv -fT "$ROOTFS" "${BUILD_DIRECTORY}/${INSTALLS_NAME}"
 
         else
                 info "Reusing image: phases.installs[$idx] 'arch=$ARCH' 'image=$BASE_IMAGE' 'release=$BASE_IMAGE_RELEASE' \
-'build-directory=$BUILD_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args="
+'build-directory=$BUILD_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args=${install_args} ${build_args}'"
                 if [ ! -d "${BUILD_DIRECTORY}/${INSTALLS_NAME}" ]; then
                         fatal "Image '${BUILD_DIRECTORY}/${INSTALLS_NAME} not found!"
                 fi
@@ -379,9 +394,9 @@ run_phases_installs() {
 
         if [[ "$cache" == *"save"* ]]; then
                 info "Cache saving 'image=${BUILD_DIRECTORY}/${INSTALLS_NAME}' into cache ${IMAGES_CACHE}"
-                cp -dfR --preserve=all "${BUILD_DIRECTORY}/${INSTALLS_NAME}" "${IMAGES_CACHE}/${INSTALLS_NAME}.tmp/"
+                cp -dfRT --preserve=all "${BUILD_DIRECTORY}/${INSTALLS_NAME}" "${IMAGES_CACHE}/${INSTALLS_NAME}.tmp/"
                 rm -fr -- "${IMAGES_CACHE}/${INSTALLS_NAME}"
-                mv -f "${IMAGES_CACHE}/${INSTALLS_NAME}.tmp" "${IMAGES_CACHE}/${INSTALLS_NAME}"
+                mv -fT "${IMAGES_CACHE}/${INSTALLS_NAME}.tmp" "${IMAGES_CACHE}/${INSTALLS_NAME}"
                 chown root.root "${IMAGES_CACHE}/${INSTALLS_NAME}"
                 chown root.root "${IMAGES_CACHE}"
                 # make sure that cache permission are always saved
@@ -515,7 +530,8 @@ generate_artifact() {
         rm -fr "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}"
 
         info "Generating artifact '$ARTIFACTS_NAME' copying 'use=${ARTIFACTS_USE}' into 'name=${ARTIFACTS_BUILD_DIRECTORY}/${artifact}'"
-        cp -dfR --preserve=all "${BUILD_DIRECTORY}/${ARTIFACTS_USE}" "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}"
+        # Make sure to treat target as file
+        cp -dfRT --preserve=all "${BUILD_DIRECTORY}/${ARTIFACTS_USE}" "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}"
 
         info "Running artifact '${ARTIFACTS_BUILD_DIRECTORY}/${artifact}' commands"
         run_artifacts_commands "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}" "$idx"

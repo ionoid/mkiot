@@ -1,13 +1,12 @@
 version: 0.1
 
 arch: armhf
-build-directory: build/
+build-directory: output/
 
 env:
         variables:
                 key: "value"
-                key2: "value"
-                key3: "value"
+                arch: "armhf"
 
 phases:
         installs:
@@ -19,7 +18,7 @@ phases:
                   install-args:
                   runtime-versions:
                   commands:
-                        - ["echo", "Installed debian buster"]
+                        - ["/bin/bash", "-c", "echo Installed debian buster arch $arch"]
                         - ["copy", "LICENSE", "/opt/"]
                         - ["cat", "/etc/os-release"]
                         - ["echo", "OS release file output above"]
@@ -43,8 +42,9 @@ phases:
                 # Set what image to use from installs
                 - use: debian-armhf-dev
                   commands:
-                        - ["echo", "Build stage and programs"]
+                        - ["/bin/bash", "-c", "echo Build stage and programs buster arch $arch"]
                         - ["cat", "/etc/os-release"]
+                        - ["env"]
 
                 # Use debian-armhf-prod image as target
                 - use: debian-armhf-prod

@@ -7,7 +7,7 @@ set -e
 mkimgdeb="$(basename "$0")"
 mkimg="$(dirname "$0").sh"
 
-. ${mkiot_path}/mkimage/build-helpers.bash
+. ${mkiot_path}/build-helpers.bash
 
 usage() {
 	echo >&2 "usage: $mkimgdeb ROOTFS suite [debootstrap-args]"
@@ -216,7 +216,7 @@ fi
 	set -x
 
 	# make sure we're fully up-to-date
-	RUN --shell=sh -xc 'apt-get update && apt-get dist-upgrade -y'
+	RUN --shell=sh -xc "apt-get update && apt-get dist-upgrade -y"
 
 	# delete all the apt list files since they're big and get stale quickly
 	RUN --shell=sh -xc "rm -rf /var/lib/apt/lists/*"

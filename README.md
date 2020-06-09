@@ -8,7 +8,7 @@ A wrapper around `debootstrap` to build lightweight IoT Apps for Linux.
 
 Internally It uses `debootstrap` and other classic Linux tools. `mkiot` provides these benefits:
 
-* Produces classic archives format: `zip` and `tar` files.
+* Produces classic archives format: `tar archive` files. Other formats like `zip` etc will be added soon.
 
 * Supports multi-stage builds to optimize images and produce lightweight IoT apps.
 
@@ -61,14 +61,7 @@ Of course it needs other tools that should be installed: "python, bash, tar, zip
 image.
 
 If a field contains a character, or a string of characters, that is not supported by YAML,
-you must enclose the command in quotation marks (""). The following command is enclosed in
-quotation marks because a colon (:) followed by a space is not allowed in YAML.
-The quotation mark in the command is escaped (\"). [1] Reference.
-
-```bash
-"export PACKAGE_NAME=$(cat package.json | grep name | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g')"
-```
-
+you must enclose the command in quotation marks ("").
 
 Buildspec format:
 
@@ -256,9 +249,3 @@ for applications, the next section details this more.
 [Debian](https://www.debian.org/) is a free operation system (OS) for PC. Using `mkiot` tools we can build a minimal Debian
 based file system for applications without a Linux kernel nor other tools needed to run a complete OS. `mkiot` makes use
 of [debootstrap](https://wiki.debian.org/Debootstrap) to install the system.
-
-
-
-## References
-
-[1] https://docs.aws.amazon.com/codebuild/latest/userguide/build-spec-ref.html

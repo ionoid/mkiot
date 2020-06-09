@@ -164,7 +164,7 @@ artifacts:
 
     * `installs`: a list of different images to install that are necessary to build and produce the application artifact. This should be used to only download images or use the ones from the cache to install packages.
 
-        * `image`: required field in `installs` contains the base distribution name to use as a file system for the application. Current supported values are `debian`, `scratch` for empty file system.
+        * `image`: required field in `installs` contains the base distribution name to use as a file system for the application. Current supported values are [debian](https://www.debian.org/), and `scratch` for an empty Linux file system.
 
         * `mirror`: optional field to define the mirror where to download the distribution from.
 

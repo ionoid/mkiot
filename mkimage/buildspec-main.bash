@@ -198,68 +198,18 @@ setup_slave_mount() {
         mount --make-rslave /
 }
 
-run_artifacts_commands() {
-        export ROOTFS="$1"
-        local idx="$2"
-
-        # Make sure of working space
-        check_rootfs_inode
-
-        MOUNTED_PATH="$(realpath "${ROOTFS}")"
-        mount --bind "${MOUNTED_PATH}" "${MOUNTED_PATH}"
-
-        local cmds=$(get_yaml_value "$BUILDSPEC" "$(printf %s "artifacts | .[$idx].commands")")
-        if [ "$cmds" != "null" ]; then
-
-                # Walk now command instructions and run them
-                for comsidx in {0..40}
-                do
-                        local cmdline=$(get_yaml_value "$BUILDSPEC" "$(printf %s "artifacts | .[$idx].commands[$comsidx]")")
-                        if [ "$cmdline" == "null" ]; then
-                                break
-                        fi
-
-                        (
-                                set -x
-                                run_yaml_commands $cmdline
-                        )
-                done
-        fi
-
-        umount "${MOUNTED_PATH}"
-}
-
 run_commands() {
         # update ROOTFS here
         export ROOTFS="$1"
         local phase="$2"
         local idx="$3"
-        local shell="$4"
 
         # Make sure of working space
         check_rootfs_inode
 
-        # Run Yaml commands
+        # Run commands
         "${mkiot_path}/buildspec-run.py" --rootfs="$ROOTFS" \
-                --buildspec="$BUILDSPEC" --field "p" "$build_args"
-        MOUNTED_PATH="$(realpath "${ROOTFS}")"
-        mount --bind "${MOUNTED_PATH}" "${MOUNTED_PATH}"
-
-        # Walk now command instructions and run them
-        for comsidx in {0..40}
-        do
-                local cmdline=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases${phase} | .[$idx].commands[$comsidx]")")
-                if [ "$cmdline" == "null" ]; then
-                        break
-                fi
-
-                (
-                        set -x
-                        run_yaml_commands $cmdline
-                )
-        done
-
-        umount "${MOUNTED_PATH}"
+                --buildspec="$BUILDSPEC" --phase "${phase}, $idx" "$build_args"
 }
 
 run_phases_installs() {
@@ -385,10 +335,8 @@ run_phases_installs() {
                 fi
         fi
 
-        local shell=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$idx].shell")")
-
         # Lets run commands from the installs phase
-        run_commands "${BUILD_DIRECTORY}/${INSTALLS_NAME}" ".installs" "$idx" "$shell"
+        run_commands "${BUILD_DIRECTORY}/${INSTALLS_NAME}" "installs" "$idx"
 
         info "phases.installs[$idx] finished, image location: ${BUILD_DIRECTORY}/${INSTALLS_NAME}"
 
@@ -418,10 +366,7 @@ run_phases_pre_builds() {
 
         info "phases.pre-builds[$idx] started on 'image=${BUILD_DIRECTORY}/${use_image}'"
 
-        local shell=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases[\"pre-builds\"] | .[$idx].shell")")
-
-        # Lets run commands from the installs phase
-        run_commands "${BUILD_DIRECTORY}/${use_image}" "[\"pre-builds\"]" "$idx" "$shell"
+        run_commands "${BUILD_DIRECTORY}/${use_image}" "pre-builds" "$idx"
 
         info "phases.pre-builds[$idx] finished, image location: ${BUILD_DIRECTORY}/${use_image}"
         echo
@@ -439,10 +384,7 @@ run_phases_builds() {
 
         info "phases.builds[$idx] started on 'image=${BUILD_DIRECTORY}/${use_image}'"
 
-        local shell=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.builds | .[$idx].shell")")
-
-        # Lets run commands from the installs phase
-        run_commands "${BUILD_DIRECTORY}/${use_image}" ".builds" "$idx"
+        run_commands "${BUILD_DIRECTORY}/${use_image}" "builds" "$idx"
 
         info "phases.builds[$idx] finished, image location: ${BUILD_DIRECTORY}/${use_image}"
         echo
@@ -460,10 +402,7 @@ run_phases_post_builds() {
 
         info "phases.post-builds[$idx] started on 'image=${BUILD_DIRECTORY}/${use_image}'"
 
-        local shell=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases[\"post-builds\"] | .[$idx].shell")")
-
-        # Lets run commands from the installs phase
-        run_commands "${BUILD_DIRECTORY}/${use_image}" "[\"post-builds\"]" "$idx"
+        run_commands "${BUILD_DIRECTORY}/${use_image}" "post-builds" "$idx"
 
         info "phases.post-builds[$idx] finished, image location: ${BUILD_DIRECTORY}/${use_image}"
         echo

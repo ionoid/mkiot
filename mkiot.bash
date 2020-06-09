@@ -9,9 +9,13 @@ export mkiot_path="$(dirname "$(readlink -f "$BASH_SOURCE")")"
 set -e
 
 if [ "$(id -u)" -ne "0" ]; then
-        echo "Error: must be root"
+        echo "$mkiot: Error: must be root"
         exit 1
 fi
 
+if [ ! -f "$mkiot_path/mkimage/buildspec-main.bash" ]; then
+        export mkiot_path="/usr/lib/mkiot/"
+fi
+
 # Lets unshare the mount namespace first
-unshare -m "${mkiot_path}/mkimage/buildspec-main.bash" "$@"
+unshare -m "$mkiot_path/mkimage/buildspec-main.bash" "$@"

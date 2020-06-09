@@ -166,7 +166,7 @@ if [ -z "$IMAGES_CACHE" ] || [ "$IMAGES_CACHE" == "null" ]; then
 
         info "Cache cleaning images older than 60 days"
 
-        /usr/bin/find -P "${IMAGES_CACHE}" -xdev -depth -mtime +30 -delete
+        /usr/bin/find -P "${IMAGES_CACHE}"  -maxdepth 1 -xdev -depth -mtime +30 -delete
 else
         export IMAGES_CACHE=$(realpath $IMAGES_CACHE)
         # Create anyway

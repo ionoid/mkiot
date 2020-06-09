@@ -21,6 +21,7 @@ while [ $# -gt 0 ] && [[ "$1" == -* ]]; do
 	shift
 done
 
+DONT_TOUCH_SOURCES_LIST="true"
 suite=$BASE_IMAGE_RELEASE
 
 # allow for DEBOOTSTRAP=qemu-debootstrap ./mkimage.sh ...
@@ -218,7 +219,9 @@ fi
 	# make sure we're fully up-to-date
 	RUN apt-get update && apt-get dist-upgrade -y
 
-	# delete all the apt list files since they're big and get stale quickly
+	RUN apt-get clean
+
+        # delete all the apt list files since they're big and get stale quickly
 	RUN "rm -rf /var/lib/apt/lists/*"
 	# this forces "apt-get update" in dependent images, which is also good
 

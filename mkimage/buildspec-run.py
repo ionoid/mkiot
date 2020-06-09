@@ -201,10 +201,12 @@ def main() -> None:
         try:
                 options, extracmds = parse_args(sys.argv[1:])
                 if extracmds is not None and len(extracmds) > 0:
+                        cmds = []
                         s=" "
+                        cmds.append(s.join(extracmds))
                         print("Info: 'rootfs=%s'  running  'command=\"%s\"'" %
-                              (options.rootfs, s.join(extracmds)))
-                        run_with_shell(options.rootfs, extracmds)
+                              (options.rootfs, cmds))
+                        run_with_shell(options.rootfs, cmds)
 
                 if options.buildspec is not None:
                         if "BUILD_DIRECTORY" not in os.environ:
@@ -218,7 +220,6 @@ def main() -> None:
                         if len(cmds) == 0:
                                 return
 
-                        print(cmds)
                         for cmdline in cmds:
                                 s=" "
                                 print("Info: from 'buildspec=%s'  'rootfs=%s'  running 'command=\"%s\"'" %

@@ -317,6 +317,7 @@ run_phases_installs() {
                 # it will be picked later by next phases and also treat
                 # target as a file
                 #
+                rm -fr -- "${BUILD_DIRECTORY}/${INSTALLS_NAME}"
                 mv -fT "$ROOTFS" "${BUILD_DIRECTORY}/${INSTALLS_NAME}"
 
         else

@@ -126,7 +126,8 @@ RUN() {
         # Make sure of working space
         check_rootfs_inode
 
-        "$buildspec_run" --rootfs="$ROOTFS" $ENV_VARS_PARMS --command="$@"
+        # Following commands do not need ENV_VARS_PRAMS
+        "$buildspec_run" --rootfs="$ROOTFS" "$@"
 }
 
 get_base_image_mirror() {

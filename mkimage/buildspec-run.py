@@ -38,21 +38,57 @@ def run_command(rootfs: str, cmdline: List[str], execvp: bool = False, **kwargs:
                         newcmd += [v]
 
         newcmd.extend(cmdline)
+        process = run_raw(newcmd)
+
+        if process.returncode != 0:
+                fatal("Error: failed command '%s' with code '%d'" % (cmdline[0], process.returncode))
+
+
+def run_shell_command(rootfs: str, command: str) -> None:
+        newcmd = ["/bin/sh", "-cx", "'%s'" % command]
+        run_command(rootfs, newcmd)
+
+
+def mount_bind(what: str, where: str) -> None:
+        os.makedirs(what, 0o755, True)
+        os.makedirs(where, 0o755, True)
+
+def run_copy(rootfs: str, cmdline: List[str]) -> None:
+        if len(cmdline) < 3:
+                fatal("Yaml command 'copy' can not find parameters")
+
+        if "--from=" in cmdline[1]:
+                params = cmdline[1].split("=")
+                if len(params) > 1:
+                        src="%s/%s/%s" % (build_dir, params[1], cmdline[2])
+                else:
+                        fatal("Yaml command 'copy' --from= parameter not valid")
+                dest=cmdline[3]
+        else:
+                src=cmdline[1]
+                dest=cmdline[2]
+
+        if dest is None:
+                fatal("Yaml command 'copy' destination parameter not set")
+
+        src=os.path.abspath(src)
+        if not os.path.exists(src):
+                fatal("Yaml command 'copy' source '%s' does not exist" % src)
+
+        newcmd = ["cp", "-d", "-f", "-R",
+                  "--preserve=all",
+                  src,
+                  rootfs + "/" + dest]
 
         run_raw(newcmd)
 
-def copy(rootfs: str, cmdline: List[str]) -> None:
-        if len(cmdline) <= 1:
-                fatal("Yaml command 'copy' can not find parameters")
-
-
 
 def run_script(rootfs: str, cmdline: List[str]) -> None:
-        if len(cmdline) <= 1:
+        if len(cmdline) < 2:
                 fatal("Yaml command 'script' can not find parameters")
 
         script = cmdline[2]
-        if "from=" in cmdline[1]:
+        if "--from=" in cmdline[1]:
                 params = cmdline[1].split("=")
                 if len(params) > 1:
                         script="%s/%s/%s" % (build_dir, params[1], script)
@@ -96,7 +132,7 @@ def umount(where: str) -> None:
 def run(rootfs: str, cmdline: List[str]) -> None:
         mount_bind(rootfs, rootfs)
         if cmdline[0] == "copy":
-                copy_command(rootfs, cmdline)
+                run_copy(rootfs, cmdline)
         elif cmdline[0] == "script":
                 run_script(rootfs, cmdline)
         else:
@@ -110,11 +146,10 @@ class MkiotException(Exception):
 
 def parse_args(args=sys.argv[1:]):
         parser = argparse.ArgumentParser(description='Build IoT and Edge applications', add_help=True)
-        parser.add_argument("--command", type=str, help="Command to run")
+        parser.add_argument("--rootfs", type=str, required=True, help="Root filesystem path, required.")
         parser.add_argument("--buildspec", type=str, help="Buildspec yaml file")
         parser.add_argument("--phase", type=str, help="Yaml phase field path inside buildspec")
-        parser.add_argument("--rootfs", type=str, required=True, help="Root filesystem path, required.")
-        parser.add_argument("--from", type=str, help="Image envrionment to get files from")
+        parser.add_argument("--command", type=str, help="Command passed to /bin/sh inside root filesystem path.")
         return(parser.parse_args(args))
 
 
@@ -152,9 +187,6 @@ def load_yaml_commands(phase: str) -> List[str]:
                                 cmds = spec["phases"][ph][index]["commands"]
                                 print("Info: loading  'buildspec=%s'  'phase=%s[%s]' %d commands" % (build_spec, ph, index, len(cmds)))
                                 return cmds
-                else:
-                        sys.stdout.write("EOF")
-                        sys.exit(0)
 
         sys.stdout.write("EOF")
         sys.exit(0)
@@ -171,14 +203,22 @@ def main() -> None:
 
                 build_env_vars = os.getenv("ENV_VARS_PARMS")
                 build_dir = os.getenv('BUILD_DIRECTORY')
+                build_dir = os.path.abspath(build_dir)
 
                 options = parse_args(sys.argv[1:])
+
+                if options.command is not None:
+                        print("Info: 'rootfs=%s'  running  'command=\"%s\"'" % (options.rootfs, options.command))
+                        run_shell_command(options.rootfs, options.command)
+
                 if options.buildspec is not None:
                         build_spec = options.buildspec
                         cmds = load_yaml_commands(options.phase)
-
-                for cmdline in cmds:
-                        run(options.rootfs, cmdline)                        
+                        for cmdline in cmds:
+                                s=" "
+                                print("Info: from 'buildspec=%s'  'rootfs=%s'  running 'command=\"%s\"'" %
+                                      (options.buildspec, options.rootfs, s.join(cmdline)))
+                                run(options.rootfs, cmdline)
 
         except (MkiotException, MkiotException) as exp:
                 fatal(str(exp))

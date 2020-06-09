@@ -8,6 +8,8 @@ env:
 
 phases:
         installs:
+                # scratch images are empty images with only
+                # Linux file system hierarchy
                 - image: scratch
                   name: scratch-base-image
                   cache: "save,reuse"

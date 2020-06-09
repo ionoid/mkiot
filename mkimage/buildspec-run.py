@@ -41,6 +41,11 @@ def run_command(rootfs: str, cmdline: List[str], execvp: bool = False, **kwargs:
 
         run_raw(newcmd)
 
+def copy(rootfs: str, cmdline: List[str]) -> None:
+        if len(cmdline) <= 1:
+                fatal("Yaml command 'copy' can not find parameters")
+
+
 
 def run_script(rootfs: str, cmdline: List[str]) -> None:
         if len(cmdline) <= 1:
@@ -129,19 +134,24 @@ def load_yaml_commands(phase: str) -> List[str]:
 
         ph = params[0]
         index = int(params[1])
+
         if params[0] == "artifacts":
                 if index >= len(spec["artifacts"]):
                         sys.stdout.write("EOF")
                         sys.exit(0)
                         
                 if "commands" in spec["artifacts"][index]:
-                        return spec["artifacts"][index]["commands"]
+                        cmds = spec["artifacts"][index]["commands"]
+                        print("Info: loading  'buildspec=%s'  'phase=%s[%s]' %d commands" % (build_spec, ph, index, len(cmds)))
+                        return cmds
 
         else:
                 # If phase is set continue
                 if params[0] in spec["phases"] and index < len(spec["phases"][ph]):
                         if "commands" in spec["phases"][ph][index]:
-                                return spec["phases"][ph][index]["commands"]
+                                cmds = spec["phases"][ph][index]["commands"]
+                                print("Info: loading  'buildspec=%s'  'phase=%s[%s]' %d commands" % (build_spec, ph, index, len(cmds)))
+                                return cmds
                 else:
                         sys.stdout.write("EOF")
                         sys.exit(0)

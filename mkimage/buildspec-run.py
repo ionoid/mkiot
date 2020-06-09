@@ -18,6 +18,16 @@ def fatal(message: str, status: int = 1) -> NoReturn:
         sys.exit(status)
 
 
+def mount_bind(what: str, where: str) -> None:
+        os.makedirs(what, 0o755, True)
+        os.makedirs(where, 0o755, True)
+        run_raw(["mount", "--bind", what, where], check=True)
+
+
+def umount(where: str) -> None:
+        run_raw(["umount", "--recursive", "-n", where])
+
+
 def run_raw(cmdline: List[str], execvp: bool = False, **kwargs: Any) -> subprocess.CompletedProcess:
         if execvp:
                 assert not kwargs
@@ -41,17 +51,10 @@ def run_command(rootfs: str, cmdline: List[str], execvp: bool = False, **kwargs:
         process = run_raw(newcmd)
 
         if process.returncode != 0:
+                # Force umount anyway
+                umount(rootfs)
                 fatal("Error: failed command '%s' with code '%d'" % (cmdline[0], process.returncode))
 
-
-def run_shell_command(rootfs: str, command: str) -> None:
-        newcmd = ["/bin/sh", "-cx", "'%s'" % command]
-        run_command(rootfs, newcmd)
-
-
-def mount_bind(what: str, where: str) -> None:
-        os.makedirs(what, 0o755, True)
-        os.makedirs(where, 0o755, True)
 
 def run_copy(rootfs: str, cmdline: List[str]) -> None:
         if len(cmdline) < 3:
@@ -119,24 +122,23 @@ def run_script(rootfs: str, cmdline: List[str]) -> None:
         run_command(rootfs, newcmd)
 
 
-def mount_bind(what: str, where: str) -> None:
-        os.makedirs(what, 0o755, True)
-        os.makedirs(where, 0o755, True)
-        run_raw(["mount", "--bind", what, where], check=True)
-
-
-def umount(where: str) -> None:
-        run_raw(["umount", "--recursive", "-n", where])
-
-
 def run(rootfs: str, cmdline: List[str]) -> None:
-        mount_bind(rootfs, rootfs)
         if cmdline[0] == "copy":
                 run_copy(rootfs, cmdline)
-        elif cmdline[0] == "script":
+                return
+
+        mount_bind(rootfs, rootfs)
+        if cmdline[0] == "script":
                 run_script(rootfs, cmdline)
         else:
                 run_command(rootfs, cmdline)
+        umount(rootfs)
+
+
+def run_with_shell(rootfs: str, command: str) -> None:
+        newcmd = ["/bin/sh", "-xc", "\"%s\"" % command]
+        mount_bind(rootfs, rootfs)
+        run(rootfs, newcmd)
         umount(rootfs)
 
 
@@ -196,6 +198,7 @@ def main() -> None:
         global build_dir
         global build_spec
         global build_env_vars
+        global options
 
         try:
                 if "BUILD_DIRECTORY" not in os.environ:
@@ -209,7 +212,7 @@ def main() -> None:
 
                 if options.command is not None:
                         print("Info: 'rootfs=%s'  running  'command=\"%s\"'" % (options.rootfs, options.command))
-                        run_shell_command(options.rootfs, options.command)
+                        run_with_shell(options.rootfs, options.command)
 
                 if options.buildspec is not None:
                         build_spec = options.buildspec

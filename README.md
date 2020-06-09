@@ -1,6 +1,6 @@
-# Make IoT - Build Edge and IoT Apps
+# Make IoT - Build Edge and IoT Linux Apps
 
-A wrapper around `debootstrap` to build lightweight IoT Apps.
+A wrapper around `debootstrap` to build lightweight IoT Apps for Linux.
 
 ## Introduction
 
@@ -245,6 +245,18 @@ During other build stages, commands are executed inside the image environment th
 
 
 ## Examples
+
+The following examples demonstrate how to build an IoT package for Linux. The package includes the application with all its
+dependencies inside a `tar archive` file. There are multiple Linux distributions that can be used as a base file system
+for applications, the next section details this more.
+
+
+### Debian based file system
+
+[Debian](https://www.debian.org/) is a free operation system (OS) for PC. Using `mkiot` tools we can build a minimal Debian
+based file system for applications without a Linux kernel nor other tools needed to run a complete OS. `mkiot` makes use
+of [debootstrap](https://wiki.debian.org/Debootstrap) to install the system.
+
 
 
 ## References

@@ -2,7 +2,7 @@
 
 # Copyright (C) 2020 Open Devices GmbH
 
-buildspec_run="${mkiot_path}/mkimage/buildspec-run.py"
+buildspec_run="${mkiot_path}/buildspec-run.py"
 
 info() {
         >&2 echo -e "Info: ${*}"
@@ -121,115 +121,12 @@ check_binfmt_qemu_arch() {
         echo -n ${interpreter[1]}
 }
 
-COPY() {
-        shift
-
-        local from=""
-        for i in "$@"
-        do
-                case "$i" in
-                        --from=*)
-                        from="${i#*=}"
-                        shift
-                        ;;
-                esac
-        done
-
-        local src="$1"
-        local dst="$2"
-        shift 2
-
-        if [ -z "$src" ]; then
-                fatal "COPY() source was not set"
-        fi
-
-        if [ -z "$dst" ]; then
-                fatal "COPY() destination was not set"
-        fi
-
-        # Copy from another image build
-        if [ -n "$from" ]; then
-                src="$BUILD_DIRECTORY/$from/$src"
-        fi
-
-        cp -dfR --preserve=all "$(realpath $src)" "$ROOTFS/$dst"
-}
-
-RUN_SCRIPT() {
-        shift
-
-        local from=""
-        for i in "$@"
-        do
-                case "$i" in
-                        --from=*)
-                        from="${i#*=}"
-                        shift
-                        ;;
-                esac
-        done
-
-        local script="$1"
-        local dest="$2"
-
-        if [ -z "$script" ]; then
-                fatal "SCRIPT() source script was not set"
-        fi
-
-        # Copy from another image build
-        if [ -n "$from" ]; then
-                script="${BUILD_DIRECTORY}/${from}/${script}"
-        fi
-
-        if [ ! -f "$script" ]; then
-                error "SCRIPT() can not find file '$script'"
-
-                # lets try directory of buildspec
-                local lp="$(dirname $(realpath ${BUILDSPEC}))"
-                script="${lp}/${script}"
-        fi
-
-        if [ ! -f "$script" ]; then
-                fatal "SCRIPT() can not find file '$script'"
-        fi
-
-        if [ ! -x "$script" ]; then
-                fatal "SCRIPT() file '$script' is not executable"
-        fi
-
-        if [ -z "$dest" ]; then
-                # lets force it to be in "/bin/"
-                dest="/bin/$(basename ${script})"
-        fi
-
-        "$CHROOT_CONTAINER" -D "$ROOTFS" --bind="$(realpath ${script}):${dest}" $ENV_VARS_PARMS "${dest}"
-
-}
-
-RUN_YAML_COMMAND() {
-        local rootfs="$1"
-        local section="$2"
-
-
-}
 
 RUN() {
-        local shell=""
-        for i in "$@"
-        do
-                case "$i" in
-                        --shell=*)
-                        shell="${i#*=}"
-                        shift
-                        ;;
-                esac
-        done
+        # Make sure of working space
+        check_rootfs_inode
 
-        if [ -n "$shell" ]; then
-                "$CHROOT_CONTAINER" -D "$ROOTFS" $ENV_VARS_PARMS "/bin/$shell" "-xc" "$@"
-        else
-                "$CHROOT_CONTAINER" -D "$ROOTFS" $ENV_VARS_PARMS "$@"
-        fi
+        "$buildspec_run" --rootfs="$ROOTFS" $ENV_VARS_PARMS --command="$@"
 }
 
 get_base_image_mirror() {
@@ -272,20 +169,6 @@ tar_artifact() {
         tar --numeric-owner --create --auto-compress \
                 --xattrs --xattrs-include=* --file "$file" \
                 --directory "$target" --transform='s,^./,,' .
-}
-
-run_yaml_commands() {
-        local cmd="$1"
-
-        if [ "$cmd" == "null" ]; then
-                return
-        elif [ "$cmd" == "copy" ]; then
-                COPY "$@"
-        elif [ "$cmd" == "script" ]; then
-                RUN_SCRIPT "$@"
-        else
-                RUN "$@"
-        fi
 }
 
 check_url() {

@@ -249,3 +249,16 @@ for applications, the next section details this more.
 [Debian](https://www.debian.org/) is a free operation system (OS) for PC. Using `mkiot` tools we can build a minimal Debian
 based file system for applications without a Linux kernel nor other tools needed to run a complete OS. `mkiot` makes use
 of [debootstrap](https://wiki.debian.org/Debootstrap) to install the system.
+
+
+* Debian basic file system:
+
+```bash
+sudo mkiot build examples/debian/buildspec.yaml
+```
+
+* Node.js Debian file system:
+
+
+* Python Debian file system:
+

@@ -451,7 +451,7 @@ generate_artifact() {
         local suffix=$(get_yaml_value "$BUILDSPEC" "$(printf %s "artifacts | .[$idx].suffix")")
         if [ "$suffix" != "null" ]; then
                 suffix="$(eval "$suffix")"
-                ARTIFACTS_NAME="$ARTIFACTS_NAME-$suffix"
+                ARTIFACTS_NAME="${ARTIFACTS_NAME}_${suffix}"
         fi
 
         info "Generating artifact '$ARTIFACTS_NAME'"

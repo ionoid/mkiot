@@ -99,11 +99,11 @@ def run_script(rootfs: str, cmdline: List[str], envvars: bool) -> None:
                 else:
                         fatal("Yaml command 'script' --from= parameter not valid")
 
-                if cmdline[3] is not None:
+                if len(cmdline) == 4:
                         dest=cmdline[3]
         else:
                 script=cmdline[1]
-                if cmdline[2] is not None:
+                if len(cmdline) == 3:
                         dest=cmdline[2]
 
                 
@@ -122,7 +122,7 @@ def run_script(rootfs: str, cmdline: List[str], envvars: bool) -> None:
                 fatal("Yaml command 'script' script file '%s' not executable" % script)
 
         if dest == "":
-                dest="/bin/%s" % (os.path.basename(stript))
+                dest="/bin/%s" % (os.path.basename(script))
 
         script=os.path.abspath(script)
         newcmd = ["--bind=" + script + ":" + dest,

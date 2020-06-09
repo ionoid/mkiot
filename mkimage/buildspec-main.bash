@@ -209,7 +209,7 @@ run_commands() {
 
         # Run commands
         "${mkiot_path}/buildspec-run.py" --rootfs="$ROOTFS" \
-                --buildspec="$BUILDSPEC" --phase "${phase}, $idx" "$build_args"
+                --buildspec="$BUILDSPEC" --phase="${phase}, $idx"
 }
 
 run_phases_installs() {
@@ -295,13 +295,8 @@ run_phases_installs() {
 	                mkdir -p "$ROOTFS"
                 )
 
-                echo $OOTFS
                 mkdir -p ${ROOTFS}
                 chown ${user}.${user} ${ROOTFS}
-
-                MOUNTED_PATH="$(realpath "${ROOTFS}")"
-                # Bind mount ROOTFS so we can umount recursively later
-                mount --bind "${MOUNTED_PATH}" "${MOUNTED_PATH}"
 
                 info "Building with: 'buildspec=$BUILDSPEC' phases.installs[$idx] 'arch=$ARCH' 'image=$BASE_IMAGE' 'release=$BASE_IMAGE_RELEASE' \
 'build-directory=$BUILD_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args=${install_args} ${build_args}'"
@@ -314,12 +309,9 @@ run_phases_installs() {
                         # pass all remaining arguments to $script
                         "${mkiot_path}/debootstrap" --arch="$ARCH" "$install_args" "$build_args"
                 else
-                        umount "${MOUNTED_PATH}"
                         fatal "unsupported target image '$BASE_IMAGE'"
                 fi
         
-                umount "${MOUNTED_PATH}"
-
                 #
                 # Make sure to point back rootfs to INSTALLS_NAME,
                 # it will be picked later by next phases and also treat
@@ -473,7 +465,7 @@ generate_artifact() {
         cp -dfRT --preserve=all "${BUILD_DIRECTORY}/${ARTIFACTS_USE}" "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}"
 
         info "Running artifact '${ARTIFACTS_BUILD_DIRECTORY}/${artifact}' commands"
-        run_artifacts_commands "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}" "$idx"
+        run_commands "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}" "artifacts" "$idx"
 
         info "Copying artifact files and directories into '${ARTIFACTS_BUILD_DIRECTORY}/${artifact}'"
         for i in {0..20}

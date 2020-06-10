@@ -262,3 +262,9 @@ sudo mkiot build examples/debian/buildspec.yaml
 
 * Python Debian file system:
 
+
+### Scratch file system
+
+Scratch based file system contains empty directories parts of the [Filesystem Hierarchy
+Standard](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard). The directories are empty on purpose, which
+allows to build images on top.

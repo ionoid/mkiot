@@ -299,8 +299,19 @@ sudo mkiot build examples/node.js/14/buster/buildspec-node.js-full-armv7l.yaml
 * Python Debian file system:
 
 
+### Alpine based file system
+
+To be added soon.
+
+
 ### Scratch file system
 
 Scratch based file system contains empty directories parts of the [Filesystem Hierarchy
 Standard](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard). The directories are empty on purpose, which
 allows to build images on top.
+
+* Scratch file system example:
+
+```bash
+sudo mkiot build examples/scratch/buildspec.yaml
+```

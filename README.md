@@ -280,19 +280,28 @@ of [debootstrap](https://wiki.debian.org/Debootstrap) to install the system.
 sudo mkiot build examples/debian/buildspec.yaml
 ```
 
+
 * Development Debian with build essential packages:
 
 ```bash
 sudo mkiot build examples/devtools/debian/buster/buildspec-devtools-armhf.yaml
 ```
 
+#### Node.js based on Debian
 
 * Node.js Debian file system:
 
+Node.js package from usptream with minimal debian:
+```bash
+sudo mkiot build examples/node.js/debian/buster/buildspec-node.js-minimal-debian-armhf.yaml
+```
+
+Node.js binary from upstream with extra devtools and build essential file system:
 ```bash
 sudo mkiot build examples/node.js/14/buster/buildspec-node.js-devtools-debian-armv7l.yaml
 ```
 
+#### Python based on Debian
 
 * Python Debian file system:
 

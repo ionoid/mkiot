@@ -1,0 +1,28 @@
+version: 0.1
+
+arch: armhf
+build-directory: output/
+
+env:
+        variables:
+                key: "value"
+                arch: "armhf"
+
+phases:
+        installs:
+                - image: debian
+                  mirror: http://deb.debian.org/debian/
+                  release: buster
+                  name: debian-armhf-dev
+                  cache: "reuse"
+                  commands:
+                        - ["/bin/bash", "-c", "echo Installed debian buster arch $arch"]
+                        - ["cat", "/etc/os-release"]
+                        - ["echo", "OS release file output above"]
+
+artifacts:
+        - use: debian-armhf-dev
+          name: debian-buster_armhf
+          suffix: date +%Y-%m-%d
+          files:
+          compression: tar

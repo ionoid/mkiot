@@ -290,13 +290,27 @@ sudo mkiot build examples/devtools/debian/buster/buildspec-devtools-armhf.yaml
 * Node.js Debian file system:
 
 ```bash
-sudo mkiot build examples/node.js/14/buster/buildspec-node.js-full-armv7l.yaml
+sudo mkiot build examples/node.js/14/buster/buildspec-node.js-devtools-debian-armv7l.yaml
 ```
 
 
-
-
 * Python Debian file system:
+
+Minimal Debian already includes `python2`
+```bash
+sudo mkiot build examples/debian/buildspec.yaml
+```
+
+Python3 with minimal file system:
+```bash
+sudo mkiot build examples/python/debian/buster/buildspec-python3-minimal-debian-armhf.yaml
+```
+
+Python3 with extra devtools file system:
+```bash
+sudo mkiot build examples/python/debian/buster/buildspec-python3-devtools-debian-armhf.yaml
+```
+
 
 
 ### Alpine based file system

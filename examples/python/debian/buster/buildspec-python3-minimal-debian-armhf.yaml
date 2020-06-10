@@ -1,0 +1,40 @@
+version: 0.1
+
+arch: armhf
+build-directory: output/
+
+env:
+        variables:
+                OS: linux
+
+phases:
+        installs:
+                - image: debian
+                  mirror: http://deb.debian.org/debian/
+                  name: python3_minimal_debian-buster_armhf
+                  cache: "save,reuse"
+                  commands:
+                        - ["echo", "Installed debian buster"]
+                        - ["apt-get", "update"]
+                        - ["apt-get", "install", "-y", "--no-install-recommends",
+                          "pkg-config", "ca-certificates",
+                          "curl", "netbase", "wget", "gnupg"]
+                        - ["update-ca-certificates" ]
+                        - ["rm", "-rf", "/var/lib/apt/lists/*" ]
+                        - ["rm", "-rf", "/var/cache/apt/archives/partial/" ]
+                        - ["echo", "Installed debian build devtools packages" ]
+
+
+        builds:
+                # Set what image to use from installs
+                - use: python3_minimal_debian-buster_armhf
+                  commands:
+                        - ["script", "python3-install.sh"]
+                        - ["rm", "-rf", "/var/lib/apt/lists/*"]
+                        - ["rm", "-rf", "/var/cache/apt/archives/partial/"]
+                        - ["/bin/bash", "-c", "echo $(python3 --version) installed"]
+
+artifacts:
+        - use: python3_minimal_debian-buster_armhf
+          name: python3_minimal_debian-buster_armhf
+          compression: tar

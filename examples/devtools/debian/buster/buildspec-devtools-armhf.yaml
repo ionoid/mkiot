@@ -17,7 +17,7 @@ phases:
                         - ["apt-get", "update" ]
                         - ["apt-get", "install", "-y", "--no-install-recommends",
                           "build-essential", "pkg-config", "ca-certificates",
-                          "curl", "netbase", "wget", "git", "mercurial",
+                          "curl", "netbase", "wget", "git", "mercurial", "file",
                           "openssh-client", "subversion", "gnupg", "dirmngr", "procps" ]
                         - ["update-ca-certificates" ]
                         - ["rm", "-rf", "/var/lib/apt/lists/*" ]

@@ -17,6 +17,9 @@ Internally It uses `debootstrap` and other classic Linux tools. `mkiot` provides
 
 ## Install
 
+
+### Dependencies
+
 `mkiot` needs the following packages `qemu`, `qemu-user-static`, `binfmt-support`, `systemd-nspawn`, `deboostrap` and
 `python yq package and tool`.
 
@@ -53,6 +56,26 @@ To install the necessary dependencies on `debian` or `ubuntu`:
 
 
 Of course it needs other tools that should be installed: "python, bash, tar, zip"
+
+
+### Install
+
+After cloning this repository:
+
+```bash
+git clone https://github.com/ionoid/mkiot.git
+```
+
+Install:
+```bash
+cd mkiot
+sudo ./install.bash
+```
+
+To uninstall:
+```bash
+sudo ./uninstall.bash
+```
 
 
 ## Build Spec syntax
@@ -251,13 +274,26 @@ based file system for applications without a Linux kernel nor other tools needed
 of [debootstrap](https://wiki.debian.org/Debootstrap) to install the system.
 
 
-* Debian basic file system:
+* Minimal Debian file system:
 
 ```bash
 sudo mkiot build examples/debian/buildspec.yaml
 ```
 
+* Development Debian with build essential packages:
+
+```bash
+sudo mkiot build examples/devtools/debian/buster/buildspec-devtools-armhf.yaml
+```
+
+
 * Node.js Debian file system:
+
+```bash
+sudo mkiot build examples/node.js/14/buster/buildspec-node.js-full-armv7l.yaml
+```
+
+
 
 
 * Python Debian file system:

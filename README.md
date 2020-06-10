@@ -296,7 +296,7 @@ Node.js package from usptream with minimal debian:
 sudo mkiot build examples/node.js/debian/buster/buildspec-node.js-minimal-debian-armhf.yaml
 ```
 
-Node.js binary from upstream with extra devtools and build essential file system:
+Node.js binary from upstream with extra devtools, build essential file system and yarn:
 ```bash
 sudo mkiot build examples/node.js/14/buster/buildspec-node.js-devtools-debian-armv7l.yaml
 ```

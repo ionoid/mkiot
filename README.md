@@ -306,9 +306,9 @@ sudo mkiot build examples/node.js/14/buster/buildspec-node.js-devtools-debian-ar
 
 * Python Debian file system:
 
-Minimal Debian already includes `python2`
+Development Debian already includes `python2`
 ```bash
-sudo mkiot build examples/debian/buildspec.yaml
+sudo mkiot build examples/devtools/debian/buster/buildspec-devtools-armhf.yaml
 ```
 
 Python3 with minimal file system:

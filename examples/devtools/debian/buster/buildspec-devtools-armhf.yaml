@@ -16,11 +16,9 @@ phases:
                         - ["echo", "Installed debian buster" ]
                         - ["apt-get", "update" ]
                         - ["apt-get", "install", "-y", "--no-install-recommends",
-                                "build-essential pkg-config
-                                ca-certificates curl netbase wget
-                                git mercurial openssh-client subversion
-                                gnupg dirmngr
-                                procps" ]
+                          "build-essential", "pkg-config", "ca-certificates",
+                          "curl", "netbase", "wget", "git", "mercurial",
+                          "openssh-client", "subversion", "gnupg", "dirmngr", "procps" ]
                         - ["update-ca-certificates" ]
                         - ["rm", "-rf", "/var/lib/apt/lists/*" ]
                         - ["rm", "-rf", "/var/cache/apt/archives/partial/" ]

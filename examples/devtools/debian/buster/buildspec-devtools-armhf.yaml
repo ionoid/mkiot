@@ -19,6 +19,8 @@ phases:
                           "build-essential", "pkg-config", "ca-certificates",
                           "curl", "netbase", "wget", "git", "mercurial", "file",
                           "openssh-client", "subversion", "gnupg", "dirmngr", "procps" ]
+                        # On armhf we have to rehash certificates for openssl tools
+                        - ["c_rehash" ]
                         - ["update-ca-certificates" ]
                         - ["rm", "-rf", "/var/lib/apt/lists/*" ]
                         - ["rm", "-rf", "/var/cache/apt/archives/partial/" ]

@@ -22,6 +22,8 @@ phases:
                           "build-essential", "pkg-config", "ca-certificates",
                           "curl", "netbase", "wget", "git", "mercurial",
                           "openssh-client", "subversion", "gnupg", "dirmngr", "procps" ]
+                        # On armhf we have to rehash certificates for openssl tools
+                        - ["c_rehash" ]
                         - ["update-ca-certificates" ]
                         - ["rm", "-rf", "/var/lib/apt/lists/*" ]
                         - ["rm", "-rf", "/var/cache/apt/archives/partial/" ]
@@ -35,7 +37,7 @@ phases:
                         - ["script", "node-install.sh"]
                         - ["rm", "-rf", "/var/lib/apt/lists/*"]
                         - ["rm", "-rf", "/var/cache/apt/archives/partial/"]
-                        - ["/bin/bash", "-c", "echo Installed node $NODE_VERSION buster"]
+                        - ["/bin/bash", "-c", "echo installed node $(node --version) version"]
 
 artifacts:
         - use: node-14.2.0_devtools_debian-buster_armhf

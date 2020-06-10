@@ -20,7 +20,9 @@ phases:
                         - ["apt-get", "install", "-y", "--no-install-recommends",
                           "build-essential", "pkg-config", "ca-certificates",
                           "curl", "netbase", "wget", "gnupg"]
-                        - ["update-ca-certificates" ]
+                        # On armhf we have to rehash certificates for openssl tools
+                        - ["c_rehash" ]
+                        - ["update-ca-certificates"]
                         - ["rm", "-rf", "/var/lib/apt/lists/*" ]
                         - ["rm", "-rf", "/var/cache/apt/archives/partial/" ]
                         - ["echo", "Installed debian build devtools packages" ]
@@ -33,7 +35,7 @@ phases:
                         - ["script", "node-install.sh"]
                         - ["rm", "-rf", "/var/lib/apt/lists/*"]
                         - ["rm", "-rf", "/var/cache/apt/archives/partial/"]
-                        - ["/bin/bash", "-c", "echo $(python3 --version) installed"]
+                        - ["/bin/bash", "-c", "echo installed node $(node --version) version"]
 
 artifacts:
         - use: node_minimal_debian-buster_armhf

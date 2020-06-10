@@ -13,6 +13,9 @@ from typing import (
 )
 
 
+def info(message: str) -> None:
+        sys.stderr.write("Info: %s\n" % message)
+
 def fatal(message: str, status: int = 1) -> NoReturn:
         sys.stderr.write("Fatal: %s\n" % message)
         sys.exit(status)
@@ -118,8 +121,9 @@ def run_script(rootfs: str, cmdline: List[str], envvars: bool) -> None:
         if not os.path.exists(script):
                 raise FileNotFoundError("Yaml command 'script' could not find script file")
 
+        # Lets warn here
         if os.access(script, os.X_OK) is False:
-                fatal("Yaml command 'script' script file '%s' not executable" % script)
+                info("Yaml command 'script' script file '%s' not executable" % script)
 
         if dest == "":
                 dest="/bin/%s" % (os.path.basename(script))

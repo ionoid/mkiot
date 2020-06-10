@@ -291,12 +291,13 @@ sudo mkiot build examples/devtools/debian/buster/buildspec-devtools-armhf.yaml
 
 * Node.js Debian file system:
 
-Node.js package from usptream with minimal debian:
+[Node.js
+package](https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions-enterprise-linux-fedora-and-snap-packages) from usptream with minimal debian:
 ```bash
 sudo mkiot build examples/node.js/debian/buster/buildspec-node.js-minimal-debian-armhf.yaml
 ```
 
-Node.js binary from upstream with extra devtools, build essential file system and yarn:
+Node.js binary from upstream with extra `devtools`, `build essential` and `yarn` installed:
 ```bash
 sudo mkiot build examples/node.js/14/buster/buildspec-node.js-devtools-debian-armv7l.yaml
 ```

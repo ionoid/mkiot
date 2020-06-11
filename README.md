@@ -2,8 +2,10 @@
 
 A wrapper around `debootstrap` to build lightweight IoT Apps for Linux.
 
-![Debian](res/logos/debian-logo.jpg) ![Alpine Linux](alpine-logo.png)
+![Debian](res/logos/debian-logo.jpg)    ![Alpine Linux](res/logos/alpine-logo.png)
+![Ubuntu](res/logos/ubuntu-logo/png)    ![Raspberry Pi](res/logos/Raspberry-pi-logo.png)
 
+![Node.js](res/logos/Node.js_logo.svg.png)    ![Python](res/logos/python-logo.png)
 
 ## Introduction
 

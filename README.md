@@ -61,7 +61,7 @@ To install the necessary dependencies on `debian` or `ubuntu`:
     - yq: Command-line YAML/XML processor. [yq Link](https://kislyuk.github.io/yq/).
     - pyyaml: PyYAML is a YAML parser and emitter for Python. [PyYaml Link](https://github.com/yaml/pyyaml).
 ```bash
-        sudo pip install yq pyyaml
+        sudo pip install -U yq pyyaml
 ```
 
 

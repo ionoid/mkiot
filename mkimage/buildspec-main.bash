@@ -297,7 +297,7 @@ run_phases_installs() {
 
                 mkdir -p ${ROOTFS}
                 chown ${user}.${user} ${ROOTFS}
-                cp -f --preseve=all --parents "${QEMU_ARCH_INTERPRETER}" "${ROOTFS}"
+                cp -f --preserve=all --parents "${QEMU_ARCH_INTERPRETER}" "${ROOTFS}"
 
                 info "Building with: 'buildspec=$BUILDSPEC' phases.installs[$idx] 'arch=$ARCH' 'image=$BASE_IMAGE' 'release=$BASE_IMAGE_RELEASE' \
 'build-directory=$BUILD_DIRECTORY' 'rootfs=${ROOTFS}' 'name=$INSTALLS_NAME' 'install-args=${install_args} ${build_args}'"

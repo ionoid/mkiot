@@ -20,6 +20,8 @@ Index:
 
 - [Examples](#examples)
 
+- [Multi-stage builds examples]
+
 
 ## Introduction
 
@@ -32,6 +34,10 @@ Index:
 * Only the build envrionment is defined, the execution environment is not defined nor enforced.
 
 * Deploy produced artifcats to your IoT and Edge devices with [Ionoid.io](https://ionoid.io) using [deploy Apps](https://docs-dev.ionoid.io/docs/deploy-iot-apps.html#deploy-iot-apps) from dashboard feature.
+
+
+Security note: do not run buildspec files nor use images from **untrusted parties**, this may harm your system. Always
+make sure that the buildspec or the image urls inside it originated from a trusted source.
 
 
 ## Install
@@ -199,7 +205,7 @@ artifacts:
 
     * `installs`: a list of different images to install that are necessary to build and produce the application artifact. This should be used to only download images or use the ones from the cache to install packages.
 
-        * `image`: required field in `installs` contains the base distribution name to use as a file system for the application. Current supported values are [debian](https://www.debian.org/), and `scratch` for an empty Linux file system.
+        * `image`: required field in `installs` contains the base distribution name to use as a file system for the application. Current supported values are [debian](https://www.debian.org/), and `scratch` for an empty Linux file system. For security reasons do not use untrusted sources or urls for your images, as `mkiot` runs will privileges this may harm your system, if you download or use images or buildspecs from untrusted parties.
 
         * `mirror`: optional field to define the mirror where to download the distribution from.
 
@@ -357,4 +363,90 @@ allows to build images on top.
 
 ```bash
 sudo mkiot build examples/scratch/buildspec.yaml
+```
+
+
+## Multi-stage builds
+
+One of the main issues of IoT and Edge devices is storage size, deploying artifacts and images that contain the full
+build environment with multiple libraries and packages that are necessary to build the application but not to run it,
+makes this a noticeable and annoying problem that in IoT world can be a real challenge.
+
+To solve this `mkiot` makes use of multi-stage builds, if you are familiar with `docker` this is somehow comparable to
+[Docker multi-stage builds](https://docs.docker.com/develop/develop-images/multistage-build/). It allows to organize the
+buildspec yaml file in different section in order to keep the image size small.
+
+During `installs` phase, you can specify multiple images to install, one for the build process and another one for the
+final production artifact. The production image will after copy the final binaries and packages that were produced from
+the build image.
+
+Using the [copy command](#build-spec-commands-documentation) and the `--from=image-name` will copy files and directories
+from a different base image or from the image named `image-name` to the current working image. This allows to copy files
+and directories between different images during all phases of the build process, assuming that images names are
+correct.
+
+Example of copying files between images:
+```yaml
+version: 0.1
+
+arch: armhf
+build-directory: output/
+
+env:
+        variables:
+                key: "value"
+                arch: "armhf"
+
+phases:
+        installs:
+                # Download minimal debian image and name it
+                # `debian-armhf-development`
+                - image: debian
+                  mirror: http://deb.debian.org/debian/
+                  release: buster
+                  name: debian-armhf-development
+                  cache: "reuse"
+                  commands:
+                        - ["/bin/bash", "-c", "echo Installed debian buster arch $arch"]
+                        - ["cat", "/etc/os-release"]
+                        - ["echo", "OS release file output above"]
+
+                        # Copy `config` file from local host file system into image
+                        # named `debian-armhf-development` in /etc/ directory
+                        - ["copy", "config", "/etc/config"]
+
+                # Download a secondary minimal debian image and name it
+                # `debian-armhf-production`
+                - image: debian
+                  mirror: http://deb.debian.org/debian/
+                  release: buster
+                  name: debian-armhf-production
+
+        # Build stages now
+        builds:
+                # Use debian-armhf-production image as target
+                - use: debian-armhf-production
+                  commands:
+                        # copy from image name `debian-armhf-development`
+                        # to current in use image which is
+                        # `debian-armhf-production`
+                        - ["copy", "--from=debian-armhf-development", "/etc/config", "/etc/config"]
+
+        post-builds:
+                - use: debian-armhf-production
+                  commands:
+                        # See content of file copied from another image
+                        - ["cat", "/etc/config"]
+                        - ["echo", "Build production finished"]
+
+artifacts:
+        # Use the image named `debian-armhf-production` as base image for the final artifact
+        - use: debian-armhf-production
+          # Name of final artifact
+          name: debian-buster-armhf
+
+          # suffix artifact name with current date yy-mm-day
+          suffix: date +%Y-%m-%d
+          compression: tar
+
 ```

@@ -31,7 +31,7 @@ Index:
 
 * Only the build envrionment is defined, the execution environment is not defined nor enforced.
 
-* Deploy produced artifcats to your IoT and Edge devices using [Ionoid.io](https://ionoid.io) [deploy Apps feature](https://docs-dev.ionoid.io/docs/deploy-iot-apps.html#deploy-iot-apps).
+* Deploy produced artifcats to your IoT and Edge devices with [Ionoid.io](https://ionoid.io) using [deploy Apps](https://docs-dev.ionoid.io/docs/deploy-iot-apps.html#deploy-iot-apps) from dashboard feature.
 
 
 ## Install

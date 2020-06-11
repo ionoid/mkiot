@@ -297,9 +297,10 @@ run_phases_installs() {
 
                 mkdir -p ${ROOTFS}
                 chown ${user}.${user} ${ROOTFS}
+                cp -f --preseve=all --parents "${QEMU_ARCH_INTERPRETER}" "${ROOTFS}"
 
                 info "Building with: 'buildspec=$BUILDSPEC' phases.installs[$idx] 'arch=$ARCH' 'image=$BASE_IMAGE' 'release=$BASE_IMAGE_RELEASE' \
-'build-directory=$BUILD_DIRECTORY' 'name=$INSTALLS_NAME' 'install-args=${install_args} ${build_args}'"
+'build-directory=$BUILD_DIRECTORY' 'rootfs=${ROOTFS}' 'name=$INSTALLS_NAME' 'install-args=${install_args} ${build_args}'"
 
                 if [[ "$BASE_IMAGE_MIRROR" == *"ionoid"* ]]; then
                         "${mkiot_path}/ionoid-bootstrap.bash" --arch="$ARCH" "$install_args" "$build_args"
@@ -520,7 +521,7 @@ setup_slave_mount
 ## Lets start first phase "installs"
 echo
 info "Running phases installs"
-for i in {0..4}
+for i in {0..10}
 do
         export BASE_IMAGE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$i].image")")
         if [ "$BASE_IMAGE" == "null" ]; then
@@ -536,7 +537,7 @@ done
 ## Lets run "pre-builds"
 echo
 info "Running phases pre-builds"
-for i in {0..4}
+for i in {0..10}
 do
         USE_IMAGE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases[\"pre-builds\"] | .[$i].use")")
         if [ "$USE_IMAGE" == "null" ]; then
@@ -550,7 +551,7 @@ done
 ## Run "builds"
 echo
 info "Running phases builds"
-for i in {0..4}
+for i in {0..10}
 do
         USE_IMAGE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.builds | .[$i].use")")
         if [ "$USE_IMAGE" == "null" ]; then
@@ -564,7 +565,7 @@ done
 ## Run "post-builds"
 echo
 info "Running phases post-builds"
-for i in {0..4}
+for i in {0..10}
 do
         USE_IMAGE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases[\"post-builds\"] | .[$i].use")")
         if [ "$USE_IMAGE" == "null" ]; then
@@ -578,7 +579,7 @@ done
 ## Last stage generate artifact
 echo
 info "Generating artifacts"
-for i in {0..4}
+for i in {0..10}
 do
         artifacts_use=$(get_yaml_value "$BUILDSPEC" "$(printf %s "artifacts | .[$i].use")")
         if [ -z "$artifacts_use" ] || [ "$artifacts_use" == "null" ]; then

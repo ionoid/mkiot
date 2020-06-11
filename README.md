@@ -1,8 +1,8 @@
-# Make IoT - Build Edge and IoT Linux Apps
+# Make IoT - Build Linux IoT and Edge Apps
 
-`mkiot` build IoT apps artifacts for Edge and IoT Linux devices.
+`mkiot` build IoT apps artifacts for Linux IoT and Edge devices.
 
-`mkiot` is a product maintained by [Ionoid.io](https://ionoid.io/) - IoT Next generation deployment.
+`mkiot` is a product maintained by [Ionoid.io](https://ionoid.io/) - IoT next generation deployment.
 
 ![Debian](res/logos/debian-logo.jpg)    ![Alpine Linux](res/logos/alpine-logo.png)
 ![Ubuntu](res/logos/ubuntu-logo.png)    ![Raspberry Pi](res/logos/Raspberry-pi-logo.png)
@@ -25,7 +25,7 @@ Index:
 
 ## Introduction
 
-`mkiot` build IoT apps artifacts for Edge and IoT Linux devices. Internally It uses `debootstrap` and other classic Linux tools. `mkiot` provides these benefits:
+`mkiot` makes it easy to build IoT apps and artifacts for Linux IoT and Edge devices. Internally It uses `debootstrap` and other classic Linux tools. `mkiot` provides these benefits:
 
 * Produces classic archives format: `tar archive` files. Other formats like `zip` etc will be added soon.
 
@@ -46,41 +46,23 @@ make sure that the buildspec or the image urls inside it originated from a trust
 ### Dependencies
 
 `mkiot` needs the following packages `qemu`, `qemu-user-static`, `binfmt-support`, `systemd-nspawn`, `deboostrap` and
-`python yq package and tool`.
+`python yq package and tool`. Of course it needs other tools that should be installed on standard Linux distributions:
+"python, bash, tar and zip"
 
 
 To install the necessary dependencies on `debian` or `ubuntu`:
 
-- qemu qemu-user-static
 ```bash
-        sudo apt-get install qemu qemu-user-static
+   sudo apt-get install qemu qemu-user-static binfmt-support systemd-container debootstrap
 ```
 
-- binfmt-support
-```bash
-        sudo apt-get install binfmt-support
-```
 
-- systemd-container or systemd-nspawn
-```bash
-        sudo apt-get install systemd-container
-```
-
-- deboostrap
-```bash
-        sudo apt-get install debootstrap
-```
-
-- Python packages:
+- Install Python packages:
     - yq: Command-line YAML/XML processor. [yq Link](https://kislyuk.github.io/yq/).
     - pyyaml: PyYAML is a YAML parser and emitter for Python. [PyYaml Link](https://github.com/yaml/pyyaml).
 ```bash
-        pip install yq
-        pip install pyyaml
+        sudo pip install yq pyyaml
 ```
-
-
-Of course it needs other tools that should be installed: "python, bash, tar, zip"
 
 
 ### Install
@@ -105,7 +87,7 @@ sudo ./uninstall.bash
 
 ## Build Spec syntax
 
-`mkiot` use build specs that are expressed in [YAML](https://yaml.org) format to define how to build the application
+`mkiot` uses build specs that are expressed in [YAML](https://yaml.org) format to define how to build the application
 image.
 
 If a field contains a character, or a string of characters, that is not supported by YAML,

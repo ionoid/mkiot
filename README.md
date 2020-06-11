@@ -29,6 +29,8 @@ Index:
 
 * Only the build envrionment is defined, the execution environment is not defined nor enforced.
 
+* Deploy produced artifcats to your IoT and Edge devices using [Ionoid.io](https://ionoid.io) [deploy Apps feature](https://docs-dev.ionoid.io/docs/deploy-iot-apps.html#deploy-iot-apps).
+
 
 ## Install
 
@@ -236,7 +238,7 @@ artifacts:
 
     * `commands`: optional sequence of commands with their arguments that are executed according to their order. Command example: `["/bin/echo", "hello"]`. This can be used to copy files and directories into the final artifacts. As an example an `app.yaml` file that defines how to run the application.
 
-    * `files`: optional sequence of files and directories that are copied from the host file system into the final artifact. First element is the file or directory location on the host, and second element is where to copy the files or directories inside the artifact.
+    * `files`: optional sequence of files and directories that are copied from the host file system into the final artifact. First element is the file or directory location on the host, and second element is where to copy the files or directories inside the artifact. This field can be used to copy an `app.yaml` file definition of an [IoT App](https://docs-dev.ionoid.io/docs/iot-apps.htm) inside the artifact to be deployed using [Ionoid.io](https://ionoid.io/).
 
     * `compression`: specifies the archive and compression format to use, by default it uses the `tar archive` format.
 

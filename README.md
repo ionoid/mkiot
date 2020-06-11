@@ -2,6 +2,9 @@
 
 A wrapper around `debootstrap` to build lightweight IoT Apps for Linux.
 
+![Debian](res/logos/debian-logo.jpg) ![Alpine Linux](alpine-logo.png)
+
+
 ## Introduction
 
 `mkiot` makes it simple to build IoT apps artifacts that are ready to be deployed to Edge or IoT devices.

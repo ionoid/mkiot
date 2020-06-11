@@ -20,7 +20,7 @@ Index:
 
 - [Examples](#examples)
 
-- [Multi-stage builds examples]
+- [Multi-stage builds](#multi-stage-builds)
 
 
 ## Introduction
@@ -411,10 +411,6 @@ phases:
                         - ["cat", "/etc/os-release"]
                         - ["echo", "OS release file output above"]
 
-                        # Copy `config` file from local host file system into image
-                        # named `debian-armhf-development` in /etc/ directory
-                        - ["copy", "config", "/etc/config"]
-
                 # Download a secondary minimal debian image and name it
                 # `debian-armhf-production`
                 - image: debian
@@ -424,13 +420,28 @@ phases:
 
         # Build stages now
         builds:
+                # Use debian-armhf-development image to build application
+                - use: debian-armhf-development
+                  commands:
+                        # Install extra dependecies
+                        - ["apt", "install", "-y", "$dependencies" ]
+
+                        # Copy `config` file from local host file system into image
+                        # named `debian-armhf-development` in /etc/ directory
+                        - ["copy", "myapp/config", "/etc/config"]
+
+                        # Build myapp
+                        - ["build-myapp" ]
+
+
                 # Use debian-armhf-production image as target
                 - use: debian-armhf-production
                   commands:
-                        # copy from image name `debian-armhf-development`
-                        # to current in use image which is
-                        # `debian-armhf-production`
+                        # copy from image name `debian-armhf-development` file
+                        # `/etc/config` into current in use image which is
+                        # `debian-armhf-production` using same file location
                         - ["copy", "--from=debian-armhf-development", "/etc/config", "/etc/config"]
+
 
         post-builds:
                 - use: debian-armhf-production

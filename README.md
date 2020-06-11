@@ -1,17 +1,27 @@
 # Make IoT - Build Edge and IoT Linux Apps
 
-A wrapper around `debootstrap` to build lightweight IoT Apps for Linux.
+`mkiot` build IoT apps artifacts for Edge and IoT Linux devices.
 
 ![Debian](res/logos/debian-logo.jpg)    ![Alpine Linux](res/logos/alpine-logo.png)
 ![Ubuntu](res/logos/ubuntu-logo.png)    ![Raspberry Pi](res/logos/Raspberry-pi-logo.png)
 
 ![Node.js](res/logos/Node.js_logo.svg.png)    ![Python](res/logos/python-logo.png)
 
+
+Index:
+
+- [Introduction](#introduction)
+
+- [Install](#install)
+
+- [Build spec syntax](#build-spec-syntax)
+
+- [Examples](#examples)
+    - 
+
 ## Introduction
 
-`mkiot` makes it simple to build IoT apps artifacts that are ready to be deployed to Edge or IoT devices.
-
-Internally It uses `debootstrap` and other classic Linux tools. `mkiot` provides these benefits:
+`mkiot` build IoT apps artifacts for Edge and IoT Linux devices. Internally It uses `debootstrap` and other classic Linux tools. `mkiot` provides these benefits:
 
 * Produces classic archives format: `tar archive` files. Other formats like `zip` etc will be added soon.
 
@@ -272,7 +282,7 @@ dependencies inside a `tar archive` file. There are multiple Linux distributions
 for applications, the next section details this more.
 
 
-### Debian based file system
+### Debian based images
 
 [Debian](https://www.debian.org/) is a free operation system (OS) for PC. Using `mkiot` tools we can build a minimal Debian
 based file system for applications without a Linux kernel nor other tools needed to run a complete OS. `mkiot` makes use

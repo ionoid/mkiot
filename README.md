@@ -2,6 +2,8 @@
 
 `mkiot` build IoT apps artifacts for Edge and IoT Linux devices.
 
+`mkiot` is a product maintained by [Ionoid.io](https://ionoid.io/) - IoT Next generation deployment.
+
 ![Debian](res/logos/debian-logo.jpg)    ![Alpine Linux](res/logos/alpine-logo.png)
 ![Ubuntu](res/logos/ubuntu-logo.png)    ![Raspberry Pi](res/logos/Raspberry-pi-logo.png)
 

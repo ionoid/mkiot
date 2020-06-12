@@ -245,9 +245,9 @@ During other build stages, commands are executed inside the image environment th
 
     * `script` syntax: the `script` command syntax is: `[ "script", "scriptfile", "/bin/scriptfile" ]`
     
-        * `"script"`: first element is the command.
+        * `"script"`: first element is the command `script`.
         
-        * `"scriptfile"`: the second element is the script file location on the host file system.
+        * `"scriptfile"`: the second element is the script file location on the host file system. This can be located inside the same directory where the current `buildspec.yaml` file is.
         
         * `"/bin/scriptfile"`: last element is optional. Specify where to make the script available inside the image. Usually using `/bin/` inside image is enough which is the default operation anyway if the third element is not specified.
 

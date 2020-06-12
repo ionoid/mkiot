@@ -5,7 +5,6 @@ build-directory: output/
 
 env:
         variables:
-                key: "value"
                 arch: "armhf"
 
 phases:
@@ -13,7 +12,7 @@ phases:
                 - image: debian
                   mirror: http://deb.debian.org/debian/
                   release: buster
-                  name: debian-armhf-dev
+                  name: debian-buster_armhf
                   cache: "reuse"
                   commands:
                         - ["/bin/bash", "-c", "echo Installed debian buster arch $arch"]
@@ -21,8 +20,7 @@ phases:
                         - ["echo", "OS release file output above"]
 
 artifacts:
-        - use: debian-armhf-dev
+        - use: debian-buster_armhf
           name: debian-buster_armhf
           suffix: date +%Y-%m-%d
-          files:
           compression: tar

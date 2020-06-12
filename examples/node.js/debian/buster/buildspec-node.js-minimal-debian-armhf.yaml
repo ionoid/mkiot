@@ -32,6 +32,10 @@ phases:
                 # Set what image to use from installs
                 - use: node_minimal_debian-buster_armhf
                   commands:
+                        # we run script node-install.sh to install
+                        # node, the script is the upstream version
+                        # and is located in the same directory of
+                        # this buildspec file.
                         - ["script", "node-install.sh"]
                         - ["rm", "-rf", "/var/lib/apt/lists/*"]
                         - ["rm", "-rf", "/var/cache/apt/archives/partial/"]

@@ -34,6 +34,9 @@ phases:
                 # Set what image to use from installs
                 - use: node-14.2.0_devtools_debian-buster_armhf
                   commands:
+                        # we run script node-install.sh to install
+                        # node, the script is located in the same
+                        # directory of this buildspec file.
                         - ["script", "node-install.sh"]
                         - ["rm", "-rf", "/var/lib/apt/lists/*"]
                         - ["rm", "-rf", "/var/cache/apt/archives/partial/"]

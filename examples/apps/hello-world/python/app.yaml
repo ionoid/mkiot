@@ -1,0 +1,6 @@
+name: hello-world-python3
+version: 1
+
+apps:
+        hello-world-python3:
+                command: /usr/bin/hello-world.py

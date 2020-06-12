@@ -65,9 +65,7 @@ To install the necessary dependencies on `debian` or `ubuntu`:
 ```
 
 
-### Install
-
-After cloning this repository:
+After clone the current `mkiot` repository:
 
 ```bash
 git clone https://github.com/ionoid/mkiot.git

@@ -166,7 +166,7 @@ if [ -z "$IMAGES_CACHE" ] || [ "$IMAGES_CACHE" == "null" ]; then
 
         info "Cache cleaning images older than 60 days"
 
-        /usr/bin/find -P "${IMAGES_CACHE}"  -maxdepth 1 -xdev -depth -mtime +30 -delete
+        /usr/bin/find -P "${IMAGES_CACHE}"  -maxdepth 1 -xdev -depth -mtime +60 -delete
 else
         export IMAGES_CACHE=$(realpath $IMAGES_CACHE)
         # Create anyway
@@ -336,8 +336,8 @@ run_phases_installs() {
 
         if [[ "$cache" == *"save"* ]]; then
                 info "Cache saving 'image=${BUILD_DIRECTORY}/${INSTALLS_NAME}' into cache ${IMAGES_CACHE}"
-                cp -dfRT --preserve=all "${BUILD_DIRECTORY}/${INSTALLS_NAME}" "${IMAGES_CACHE}/${INSTALLS_NAME}.tmp/"
                 rm -fr -- "${IMAGES_CACHE}/${INSTALLS_NAME}"
+                cp -dfRT --preserve=all "${BUILD_DIRECTORY}/${INSTALLS_NAME}" "${IMAGES_CACHE}/${INSTALLS_NAME}.tmp/"
                 mv -fT "${IMAGES_CACHE}/${INSTALLS_NAME}.tmp" "${IMAGES_CACHE}/${INSTALLS_NAME}"
                 chown root.root "${IMAGES_CACHE}/${INSTALLS_NAME}"
                 chown root.root "${IMAGES_CACHE}"
@@ -477,12 +477,14 @@ generate_artifact() {
                         break
                 fi
 
-                if [ -d "${BUILD_DIRECTORY}/${file}" ]; then
-                        cp -dfR --preserve=all "${BUILD_DIRECTORY}/${file}/." "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}"
-                elif [ -f "${BUILD_DIRECTORY}/${file}" ]; then
-                        cp -df --preserve=all "${BUILD_DIRECTORY}/${file}" "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}"
+
+                file=$(realpath ${file})
+                if [ -d "${file}" ]; then
+                        cp -dfR --preserve=all "${file}/." "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}"
+                elif [ -f "${file}" ]; then
+                        cp -df --preserve=all "${file}" "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}"
                 else
-                        error "failed to add '${BUILD_DIRECTORY}/${file}' to artifact '${artifact}' not supported"
+                        error "failed to add '${file}' to artifact '${artifact}' not supported"
                 fi
         done
 

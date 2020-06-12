@@ -11,7 +11,7 @@ phases:
         installs:
                 - image: debian
                   mirror: http://deb.debian.org/debian/
-                  name: python3_minimal_debian-buster_armhf
+                  name: python2_minimal_debian-buster_armhf
                   cache: "save,reuse"
                   commands:
                         - ["echo", "Installed debian buster"]
@@ -30,14 +30,14 @@ phases:
 
         builds:
                 # Set what image to use from installs
-                - use: python3_minimal_debian-buster_armhf
+                - use: python2_minimal_debian-buster_armhf
                   commands:
-                        - ["script", "python3-install.sh"]
+                        - ["script", "python2-install.sh"]
                         - ["rm", "-rf", "/var/lib/apt/lists/*"]
                         - ["rm", "-rf", "/var/cache/apt/archives/partial/"]
-                        - ["/bin/bash", "-c", "echo $(python3 --version) installed"]
+                        - ["/bin/bash", "-c", "echo $(python --version) installed"]
 
 artifacts:
-        - use: python3_minimal_debian-buster_armhf
-          name: python3_minimal_debian-buster_armhf
+        - use: python2_minimal_debian-buster_armhf
+          name: python2_minimal_debian-buster_armhf
           compression: tar

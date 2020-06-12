@@ -280,52 +280,44 @@ of [debootstrap](https://wiki.debian.org/Debootstrap) to install the system.
 
 
 * Minimal Debian file system:
-
 ```bash
 sudo mkiot build examples/debian/buildspec.yaml
 ```
 
-
 * Development Debian with build essential packages:
-
 ```bash
 sudo mkiot build examples/devtools/debian/buster/buildspec-devtools-armhf.yaml
 ```
 
 #### Node.js based on Debian
 
-* Node.js Debian file system:
-
-[Node.js
+* [Node.js
 package](https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions-enterprise-linux-fedora-and-snap-packages) from usptream with minimal debian:
 ```bash
 sudo mkiot build examples/node.js/debian/buster/buildspec-node.js-minimal-debian-armhf.yaml
 ```
 
-Node.js binary from upstream with extra `devtools`, `build essential` and `yarn` installed:
+* Node.js binary from upstream with extra `devtools`, `build essential` and `yarn` installed:
 ```bash
 sudo mkiot build examples/node.js/14/buster/buildspec-node.js-devtools-debian-armv7l.yaml
 ```
 
 #### Python based on Debian
 
-* Python Debian file system:
-
-Python2 on minimal Debian with some development packages:
+* Python2 on minimal Debian with some development packages:
 ```bash
 sudo mkiot build examples/python/debian/buster/buildspec-python2-minimal-debian-armhf.yaml
 ```
 
-Python3 with minimal file system:
+* Python3 with minimal file system:
 ```bash
 sudo mkiot build examples/python/debian/buster/buildspec-python3-minimal-debian-armhf.yaml
 ```
 
-Python3 with extra devtools file system:
+* Python3 with extra devtools file system:
 ```bash
 sudo mkiot build examples/python/debian/buster/buildspec-python3-devtools-debian-armhf.yaml
 ```
-
 
 
 ### Alpine based file system

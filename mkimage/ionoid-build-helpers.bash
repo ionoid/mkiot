@@ -2,7 +2,7 @@
 
 # Copyright (C) 2020 Open Devices GmbH
 
-buildspec_run="${mkiot_path}/buildspec-run.py"
+buildspec_run="${mkiot_path}/ionoid-run-commands.py"
 
 info() {
         >&2 echo -e "Info: ${*}"

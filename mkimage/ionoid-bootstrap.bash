@@ -4,7 +4,7 @@ set -xe
 
 ionoid_bootstrap="$(basename "$0")"
 
-. ${mkiot_path}/build-helpers.bash
+. ${mkiot_path}/ionoid-build-helpers.bash
 
 if [ -z "$ROOTFS" ] || [ "$ROOTFS" == "/" ]; then
         fatal "ionoid bootstrap failed 'ROOTFS' invalid value"

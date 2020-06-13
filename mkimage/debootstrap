@@ -7,7 +7,7 @@ set -e
 mkimgdeb="$(basename "$0")"
 mkimg="$(dirname "$0").sh"
 
-. ${mkiot_path}/build-helpers.bash
+. ${mkiot_path}/ionoid-build-helpers.bash
 
 usage() {
 	echo >&2 "usage: $mkimgdeb ROOTFS suite [debootstrap-args]"

@@ -13,9 +13,9 @@ if [ "$(id -u)" -ne "0" ]; then
         exit 1
 fi
 
-if [ ! -f "$mkiot_path/mkimage/buildspec-main.bash" ]; then
+if [ ! -f "$mkiot_path/mkimage/ionoid-build.bash" ]; then
         export mkiot_path="/usr/lib/mkiot/"
 fi
 
 # Lets unshare the mount namespace first
-unshare -m "$mkiot_path/mkimage/buildspec-main.bash" "$@"
+unshare -m "$mkiot_path/mkimage/ionoid-build.bash" "$@"

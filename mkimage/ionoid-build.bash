@@ -224,25 +224,33 @@ copy_files_to_artifact() {
                         break
                 fi
 
-                src=$(echo "${line}" | cut -f1 -d' ')
-                dest=$(echo "${line}" | cut -f2 -d' ')
+                local cifs=$IFS
+                IFS=' ' && read -a rfile <<< "$line"
+                info "Copying files into artifact 'files=${rfile[0]} ${rfile[1]}'"
+                src="${rfile[0]}"
+                dest="${rfile[1]}"
+                IFS=$cifs
 
                 if [ -z "$src" ] || [ -z "$dest" ]; then
                         fatal "Copying files into artifact failed, invalid files entry at \"artifacts[$idx].files[$i]\""
                 fi
 
+                # Lets create targetdir in case
                 targetdir="$(dirname "$dest")"
                 if [ "$targetdir" != "." ]; then
                         mkdir -p "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}/${targetdir}"
                 fi
 
+                # Resolve realpath
                 src="$(realpath $src)"
                 if [ -d "${src}" ]; then
+                        info "Copying '${src}/.' into '${ARTIFACTS_BUILD_DIRECTORY}/${artifact}/${targetdir}'"
                         cp -dfR --preserve=all "${src}/." "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}/${targetdir}"
                 elif [ -f "${src}" ]; then
+                        info "Copying '${src}' into '${ARTIFACTS_BUILD_DIRECTORY}/${artifact}/${targetdir}'"
                         cp -dfR --preserve=all "${src}" "${ARTIFACTS_BUILD_DIRECTORY}/${artifact}/${targetdir}"
                 else
-                        error "failed to add '${src}' to artifact '${artifact}' not supported"
+                        error "failed to copy '${src}' to artifact '${artifact}/${targetdir}' not supported"
                 fi
         done
 }

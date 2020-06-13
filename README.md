@@ -271,6 +271,8 @@ The following examples demonstrate how to build an IoT package for Linux. The pa
 dependencies inside a `tar archive` file. There are multiple Linux distributions that can be used as a base file system
 for applications, the next section details this more.
 
+Possible values of `arch` inside buildspec files are: `i386`, `amd64`, `armhf` and `arm64`.
+
 
 ### Debian based images
 
@@ -320,9 +322,28 @@ sudo mkiot build examples/python/debian/buster/buildspec-python3-devtools-debian
 ```
 
 
+#### Golang based on Debian
+
+For Golang we recommend to use the same architecture of the host, in case you are producing an image
+for an `ARM` target. Use [GoArm official](https://github.com/golang/go/wiki/GoArm) to
+produce binaries that you copy to the final artifact.
+
+More resources on how to produce [Golang static
+binaries](https://docs.ionoid.io/docs/iot-apps.html#golang-static-binaries).
+
+
 ### Alpine based file system
 
 To be added soon.
+
+#### Golang based on Alpine
+
+For Golang we recommend to use the same architecture of the host, in case you are producing an image
+for an `ARM` target. Use [GoArm official](https://github.com/golang/go/wiki/GoArm) to
+produce binaries that you copy to the final artifact.
+
+More resources on how to produce [Golang static
+binaries](https://docs.ionoid.io/docs/iot-apps.html#golang-static-binaries).
 
 
 ### Scratch file system
@@ -425,8 +446,14 @@ phases:
 artifacts:
         # Use the image named `debian-armhf-production` as base image for the final artifact
         - use: debian-armhf-production
+
           # Name of final artifact
           name: debian-buster-armhf
+
+          # Files to copy to artifact
+          files:
+             - app.yaml  /app.yaml
+             - myapp     /usr/bin/myapp
 
           # suffix artifact name with current date yy-mm-day
           suffix: date +%Y-%m-%d

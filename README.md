@@ -304,6 +304,11 @@ sudo mkiot build examples/node.js/debian/buster/buildspec-node.js-minimal-debian
 sudo mkiot build examples/node.js/14/buster/buildspec-node.js-devtools-debian-armv7l.yaml
 ```
 
+* [Node-RED](https://nodered.org/) app example:
+
+Please follow this example: [build Node-RED](.examples/apps/node-red) and deploy it to your devices.
+
+
 #### Python based on Debian
 
 * Python2 on minimal Debian with some development packages:

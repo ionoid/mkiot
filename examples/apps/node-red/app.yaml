@@ -1,0 +1,6 @@
+name: Node-RED
+version: v1.0.6
+
+apps:
+        Node-RED:
+                command: /usr/bin/node-red 

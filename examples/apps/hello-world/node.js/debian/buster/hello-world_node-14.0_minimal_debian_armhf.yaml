@@ -1,0 +1,54 @@
+version: 0.1
+
+arch: armhf
+build-directory: output/
+
+env:
+        variables:
+                OS: linux
+                NODE_ARCH: "armv7l"
+
+phases:
+        installs:
+                - image: debian
+                  mirror: http://deb.debian.org/debian/
+                  name: node_minimal_debian-buster_armhf
+                  cache: "save,reuse"
+                  commands:
+                        - ["echo", "Installed debian buster"]
+                        - ["apt-get", "update"]
+                        - ["apt-get", "install", "-y", "--no-install-recommends",
+                          "build-essential", "pkg-config", "ca-certificates",
+                          "curl", "netbase", "wget", "gnupg"]
+                        # On armhf we have to rehash certificates for openssl tools
+                        - ["c_rehash" ]
+                        - ["update-ca-certificates"]
+                        - ["rm", "-rf", "/var/lib/apt/lists/*" ]
+                        - ["rm", "-rf", "/var/cache/apt/archives/partial/" ]
+                        - ["echo", "Installed debian build devtools packages" ]
+
+
+        builds:
+                # Set what image to use from installs
+                - use: node_minimal_debian-buster_armhf
+                  commands:
+                        # we run script node-install.sh to install
+                        # node, the script is the upstream version
+                        # and is located in the same directory of
+                        # this buildspec file.
+                        - ["script", "node-install.sh"]
+                        - ["rm", "-rf", "/var/lib/apt/lists/*"]
+                        - ["rm", "-rf", "/var/cache/apt/archives/partial/"]
+                        - ["/bin/bash", "-c", "echo installed node $(node --version) version"]
+
+artifacts:
+        - use: node_minimal_debian-buster_armhf
+          name: node_minimal_debian-buster_armhf
+          files:
+                # copy app.yaml to root artifact /app.yaml
+                - app.yaml /app.yaml
+
+                # copy my application
+                - hello-world.js  /usr/bin/hello-world.js
+
+          compression: tar

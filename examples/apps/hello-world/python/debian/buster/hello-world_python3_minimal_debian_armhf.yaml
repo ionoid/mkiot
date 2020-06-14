@@ -12,7 +12,7 @@ phases:
                 - image: debian
                   mirror: http://deb.debian.org/debian/
                   name: hello-world_python3_debian-buster_armhf
-                  cache: "save,reuse"
+                  cache: "reuse"
                   commands:
                         - ["echo", "Installed debian buster"]
                         - ["apt-get", "update"]

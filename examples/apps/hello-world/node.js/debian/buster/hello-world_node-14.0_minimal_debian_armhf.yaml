@@ -13,7 +13,7 @@ phases:
                 - image: debian
                   mirror: http://deb.debian.org/debian/
                   name: node_minimal_debian-buster_armhf
-                  cache: "save,reuse"
+                  cache: "reuse"
                   commands:
                         - ["echo", "Installed debian buster"]
                         - ["apt-get", "update"]
@@ -43,7 +43,7 @@ phases:
 
 artifacts:
         - use: node_minimal_debian-buster_armhf
-          name: node_minimal_debian-buster_armhf
+          name: hello-world_node-14.0_minimal_debian_armhf
           files:
                 # copy app.yaml to root artifact /app.yaml
                 - app.yaml /app.yaml

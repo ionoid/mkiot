@@ -3,4 +3,4 @@ version: 1
 
 apps:
         hello-world-node.js:
-                command: /usr/bin/hello-world.js
+                command: /usr/bin/node /usr/bin/hello-world.js

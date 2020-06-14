@@ -1,0 +1,6 @@
+name: hello-world-node.js
+version: 1
+
+apps:
+        hello-world-node.js:
+                command: /usr/bin/hello-world.js

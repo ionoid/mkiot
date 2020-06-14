@@ -7,15 +7,17 @@
 
 ## Images and Environments
 
-![Debian](res/logos/debian-logo.jpg)    ![Alpine Linux](res/logos/alpine-logo.png)
-![Ubuntu](res/logos/ubuntu-logo.png)    ![Raspberry Pi](res/logos/Raspberry-pi-logo.png)
+[![Debian](res/logos/debian-logo.jpg)](https://www.debian.org)    [![Alpine
+Linux](res/logos/alpine-logo.png)](https://alpinelinux.org/)
+[![Ubuntu](res/logos/ubuntu-logo.png)](https://ubuntu.com/)    [![Raspberry
+Pi](res/logos/Raspberry-pi-logo.png)](https://www.raspberrypi.org/)
 
-![Node.js](res/logos/Node.js_logo.svg.png)    ![Python](res/logos/python-logo.png)
+[![Node.js](res/logos/Node.js_logo.svg.png)](https://nodejs.org/en/)    [![Python](res/logos/python-logo.png)](https://www.python.org/)
 
 
 ## Apps
 
-![Node-RED](res/logos/node-red-logo.png)
+[![Node-RED](res/logos/node-red-logo.png)](https://nodered.org)
 
 
 ## Index:

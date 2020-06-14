@@ -10,7 +10,12 @@
 ![Node.js](res/logos/Node.js_logo.svg.png)    ![Python](res/logos/python-logo.png)
 
 
-Index:
+## Apps
+
+![Node-RED](res/logos/node-red-logo.png)
+
+
+## Index:
 
 - [Introduction](#introduction)
 
@@ -305,8 +310,7 @@ sudo mkiot build examples/node.js/14/buster/buildspec-node.js-devtools-debian-ar
 ```
 
 * [Node-RED](https://nodered.org/) app example:
-
-Please follow this example: [build Node-RED](.examples/apps/node-red) and deploy it to your devices.
+Please follow this example: [build Node-RED](examples/apps/node-red) and deploy it to your devices.
 
 
 #### Python based on Debian

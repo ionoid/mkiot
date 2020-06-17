@@ -1,0 +1,23 @@
+version: 0.1
+
+arch: armhf
+build-directory: output/
+
+env:
+        variables:
+                arch: "armhf"
+
+phases:
+        installs:
+                - image: alpine
+                  name: alpine-mini_armhf
+                  cache: "save,reuse"
+                  commands:
+                        - ["/bin/bash", "-c", "echo Installed alpine mini ARCH=$arch"]
+                        - ["cat", "/etc/os-release"]
+
+artifacts:
+        - use: alpine-mini_armhf
+          name: alpine-mini_armhf
+          suffix: date +%Y-%m-%d
+          compression: tar.gz

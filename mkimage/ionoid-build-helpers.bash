@@ -4,6 +4,10 @@
 
 buildspec_run="${mkiot_path}/ionoid-run-commands.py"
 
+einfo() {
+        >&2 printf '\n\033[1;36m> Info: %s\033[0m\n' "$@" >&2  # bold cyan
+}
+
 info() {
         >&2 echo -e "Info: ${*}"
 }
@@ -149,14 +153,17 @@ get_base_image_release() {
 finalize_etc_config() {
         local rootfs=$1
 
-        mkdir -p "$rootfs/etc"
+        cdir=$(pwd)
+        cd "$rootfs"
+        mkdir -p "etc"
 
         # make sure /etc/resolv.conf has something useful in it
-        cat > "$ROOTFS/etc/resolv.conf" << 'EOF'
+        cat > "etc/resolv.conf" << 'EOF'
 nameserver 8.8.8.8
 nameserver 8.8.4.4
 EOF
 
+        cd $cdir
 }
 
 zip_artifact() {

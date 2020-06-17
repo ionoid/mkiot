@@ -547,7 +547,7 @@ setup_slave_mount
 
 ## Lets start first phase "installs"
 echo
-info "Running phases installs"
+einfo "Running phases installs"
 for i in {0..10}
 do
         export BASE_IMAGE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.installs | .[$i].image")")
@@ -563,7 +563,7 @@ done
 
 ## Lets run "pre-builds"
 echo
-info "Running phases pre-builds"
+einfo "Running phases pre-builds"
 for i in {0..10}
 do
         USE_IMAGE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases[\"pre-builds\"] | .[$i].use")")
@@ -577,7 +577,7 @@ done
 
 ## Run "builds"
 echo
-info "Running phases builds"
+einfo "Running phases builds"
 for i in {0..10}
 do
         USE_IMAGE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases.builds | .[$i].use")")
@@ -591,7 +591,7 @@ done
 
 ## Run "post-builds"
 echo
-info "Running phases post-builds"
+einfo "Running phases post-builds"
 for i in {0..10}
 do
         USE_IMAGE=$(get_yaml_value "$BUILDSPEC" "$(printf %s "phases[\"post-builds\"] | .[$i].use")")
@@ -605,7 +605,7 @@ done
 
 ## Last stage generate artifact
 echo
-info "Generating artifacts"
+einfo "Generating artifacts"
 for i in {0..10}
 do
         artifacts_use=$(get_yaml_value "$BUILDSPEC" "$(printf %s "artifacts | .[$i].use")")

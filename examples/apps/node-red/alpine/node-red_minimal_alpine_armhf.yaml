@@ -1,0 +1,56 @@
+version: 0.1
+
+arch: armhf
+build-directory: output/
+
+env:
+        variables:
+                OS: linux
+                NODE_ARCH: "armv7l"
+                ARCH: "armhf"
+
+phases:
+        installs:
+                - image: alpine
+                  name: node_minimal_alpine_armhf
+                  cache: "reuse"
+                  commands:
+                        - ["/bin/bash", "-c", "echo Installed alpine mini ARCH=$ARCH"]
+                        - ["cat", "/etc/os-release"]
+                        - ["apk", "update"]
+                        - ["apk", "add", "--no-cache", "build-base",
+                           "ca-certificates", "ssl_client", "curl",
+                           "wget", "tar", "gnupg" ]
+                        - ["apk", "add", "--no-cache", "--virtual",
+                           ".build-deps", "python3", "py3-pip"]
+                        - ["rm", "-rf", "/var/cache/apk/*" ]
+                        - ["rm", "-rf", "/tmp/*" ]
+                        - ["echo", "Installed alpine build base packages" ]
+
+
+        builds:
+                # Set what image to use from installs
+                - use: node_minimal_alpine_armhf
+                  commands:
+                        # we run script node-install.sh to install
+                        # node, the script is the upstream version
+                        # and is located in the same directory of
+                        # this buildspec file.
+                        - ["script", "node-install.sh"]
+                        - ["/bin/bash", "-c", "echo installed node $(node --version) version"]
+                        - ["script", "node-red-install.sh"]
+                        - ["echo", "Installed node-red"]
+
+        post-builds:
+                - use: node_minimal_alpine_armhf
+                  commands:
+                        - ["script", "cleanup-node-install.sh"]
+
+
+artifacts:
+        - use: node_minimal_alpine_armhf
+          name: node-red_minimal_alpine_armhf
+          files:
+                # copy app.yaml to root artifact /app.yaml
+                - app.yaml /app.yaml
+          compression: tar.gz

@@ -34,11 +34,11 @@ Then open your browser at [http://127.0.0.1:1880/](http://127.0.0.1:1880/)
 
 ## Node-RED Alpine Based Image
 
-To build Node-RED artifact based on Alpine, make sure to be in thid directory and start the build:
+To build Node-RED artifact based on Alpine, make sure to be in this directory and start the build:
 
 ```bash
 cd examples/apps/node-red/
-sudo mkiot build /alpine/node-red_minimal_alpine_armhf.yaml
+sudo mkiot build alpine/node-red_minimal_alpine_armhf.yaml
 ```
 
 

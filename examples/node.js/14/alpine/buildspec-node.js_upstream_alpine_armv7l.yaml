@@ -1,0 +1,40 @@
+version: 0.1
+
+arch: armhf
+build-directory: output/
+
+env:
+        variables:
+                NODE_VERSION: "14.4.0"
+                YARN_VERSION: "1.22.4"
+                OS: linux
+                NODE_ARCH: "armv7l"
+                ARCH: "armhf"
+
+phases:
+        installs:
+                - image: alpine
+                  name: node-14.4.0_upstream_alpine_armhf
+                  cache: "reuse"
+                  commands:
+                        - ["/bin/bash", "-c", "echo Installed alpine mini ARCH=$ARCH"]
+
+        builds:
+                # Set what image to use from installs
+                - use: node-14.4.0_upstream_alpine_armhf
+                  commands:
+                        # we run script node-install.sh to install
+                        # node, the script is located in the same
+                        # directory of this buildspec file.
+                        - ["script", "node-install.sh"]
+                        - ["/bin/bash", "-c", "echo installed node $(node --version) version"]
+
+        post-builds:
+                - use: node-14.4.0_upstream_alpine_armhf
+                  commands:
+                        - ["script", "cleanup-node-install.sh"]
+
+artifacts:
+        - use: node-14.4.0_upstream_alpine_armhf
+          name: node-14.4.0_upstream_alpine_armhf
+          compression: tar.gz

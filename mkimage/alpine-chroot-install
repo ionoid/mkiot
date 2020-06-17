@@ -172,13 +172,14 @@ export IONOID_USER="ionoid-app"
 
 alpine_setup_fs() {
 	cat <<-EOF
-                if [ -d /etc/sudoers.d ] && [ ! -e /etc/sudoers.d/wheel ]; then
-		        echo '%wheel ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/wheel
-	        fi
+#!/bin/sh
+if [ -d /etc/sudoers.d ] && [ ! -e /etc/sudoers.d/wheel ]; then
+        echo '%wheel ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/wheel
+fi
 
-	        if [ -n "${IONOID_USER:-}" ]; then
-		        adduser -u "1000" -G users -s /bin/sh -D "${IONOID_USER:-}" || true
-	        fi
+if [ -n "${IONOID_USER:-}" ]; then
+        adduser -u "1000" -G users -s /bin/sh -D "${IONOID_USER:-}" || true
+fi
 	EOF
 }
 
@@ -217,8 +218,13 @@ alpine_setup_chroot() {
 
 #------------------------- Debian/Ubuntu ---------------------------#
 
-alias cmp_versions='dpkg --compare-versions'
-alias apt_install='apt-get install -y --no-install-recommends'
+cmp_versions() {
+        dpkg --compare-versions "$@"
+}
+
+apt_install() {
+        apt-get install -y --no-install-recommends "$@"
+}
 
 # Prints version of the specified APT package that would be installed.
 # $1: package name
@@ -299,7 +305,7 @@ if [ -z "$ROOTFS" ]; then
 	die 'ROOTFS where to build the app file system is not set!'
 fi
 
-einfo "Installing Alpine Linux $ALPINE_BRANCH 'arch=${ARCH}' into 'rootfs=${ROOTFS}'"
+einfo "Installing Alpine Linux 'release=$ALPINE_BRANCH' 'arch=${ARCH}' into 'rootfs=${ROOTFS}'"
 
 mkdir -p "$ROOTFS"
 
@@ -308,6 +314,7 @@ mkdir -p "$ROOTFS"
 QEMU_EMULATOR=''
 if [ -n "$ARCH" ] && [ $(normalize_arch $ARCH) != $(normalize_arch $(uname -m)) ]; then
 	qemu_arch="$(normalize_arch $ARCH)"
+        echo "$qemu_arch"
 	QEMU_EMULATOR="/usr/bin/qemu-$qemu_arch-static"
 
 	if [ ! -x "$QEMU_EMULATOR" ]; then

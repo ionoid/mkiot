@@ -27,8 +27,8 @@ fi
 usage() {
 	echo >&2 "usage: $mkiot build buildspec.yaml"
 	echo >&2 "   ie: $mkiot build examples/scratch/buildspec.yaml"
+	echo >&2 "   ie: $mkiot build examples/alpine/buildspec.yaml"
 	echo >&2 "   ie: $mkiot build examples/debian/buildspec.yaml"
-	echo >&2 "       $mkiot build buildspec.yaml"
 	exit 1
 }
 
@@ -260,7 +260,7 @@ run_phases_installs() {
         shift 1
         local build_args="$@"
 
-        if [ "$BASE_IMAGE" == "debian" ] || [ "$BASE_IMAGE" == "scratch" ]; then
+        if [ "$BASE_IMAGE" == "debian" ] || [ "$BASE_IMAGE" == "scratch" ] || [ "$BASE_IMAGE" == "alpine" ]; then
                 # Set default release mirror values
                 . ${mkiot_path}/$BASE_IMAGE/install
                 export BASE_IMAGE_RELEASE="${release}"
@@ -352,6 +352,9 @@ run_phases_installs() {
                 elif [ "$BASE_IMAGE" == "debian" ]; then
                         # pass all remaining arguments to $script
                         "${mkiot_path}/debootstrap" --arch="$ARCH" "$install_args" "$build_args"
+                elif [ "$BASE_IMAGE" == "alpine" ]; then
+                        # pass all remaining arguments to $script
+                        "${mkiot_path}/alpine-chroot-install" -a "$ARCH" "$install_args" "$build_args"
                 else
                         fatal "unsupported target image '$BASE_IMAGE'"
                 fi

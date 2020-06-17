@@ -5,7 +5,7 @@ build-directory: output/
 
 env:
         variables:
-                arch: "armhf"
+                ARCH: "armhf"
 
 phases:
         installs:
@@ -13,7 +13,7 @@ phases:
                   name: alpine-mini_armhf
                   cache: "save,reuse"
                   commands:
-                        - ["/bin/bash", "-c", "echo Installed alpine mini ARCH=$arch"]
+                        - ["/bin/bash", "-c", "echo Installed alpine mini ARCH=$ARCH"]
                         - ["cat", "/etc/os-release"]
 
 artifacts:

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # vim: set ts=4:
 #---help---
 # Usage: alpine-chroot-install [options]
@@ -14,7 +14,7 @@
 # be used to enter the chroot environment. That script do the following:
 #
 #   1. saves environment variables specified by $CHROOT_KEEP_VARS and PWD,
-#   2. chroots into $CHROOT_DIR,
+#   2. chroots into $ROOTFS or $ROOTFS,
 #   3. starts clean environment using "env -i",
 #   4. switches user and simulates full login using "su -l",
 #   5. loads saved environment variables and changes directory to saved PWD,
@@ -22,7 +22,7 @@
 #
 # Example:
 #   sudo alpine-chroot-install -d /alpine -p build-base -p cmake
-#	/alpine/enter-chroot -u $USER ./build
+#	apline-chroot -u $USER ./build
 #
 # Options and environment variables:
 #   -a ARCH                CPU architecture for the chroot. If not set, then it's
@@ -33,7 +33,7 @@
 #
 #   -b ALPINE_BRANCH       Alpine branch to install (default is latest-stable).
 #
-#   -d CHROOT_DIR          Absolute path to the directory where Alpine chroot
+#   -d ROOTFS          Absolute path to the directory where Alpine chroot
 #                          should be installed (default is /alpine).
 #
 #   -i BIND_DIR            Absolute path to the directory on the host system that
@@ -77,6 +77,10 @@
 set -eu
 
 #=======================  C o n s t a n t s  =======================#
+
+
+. ${mkiot_path}/ionoid-build-helpers.bash
+
 
 : ${APK_TOOLS_URI:="https://github.com/alpinelinux/apk-tools/releases/download/v2.10.4/apk-tools-2.10.4-x86_64-linux.tar.gz"}
 : ${APK_TOOLS_SHA256:="efe948160317fe78058e207554d0d9195a3dfcc35f77df278d30448d7b3eb892"}
@@ -164,7 +168,21 @@ usage() {
 	sed -En '/^#---help---/,/^#---help---/p' "$0" | sed -E 's/^# ?//; 1d;$d;'
 }
 
-gen_chroot_script() {
+export IONOID_USER="ionoid-app"
+
+alpine_setup_fs() {
+	cat <<-EOF
+                if [ -d /etc/sudoers.d ] && [ ! -e /etc/sudoers.d/wheel ]; then
+		        echo '%wheel ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/wheel
+	        fi
+
+	        if [ -n "${IONOID_USER:-}" ]; then
+		        adduser -u "1000" -G users -s /bin/sh -D "${IONOID_USER:-}" || true
+	        fi
+	EOF
+}
+
+alpine_setup_chroot() {
 	cat <<-EOF
 		#!/bin/sh
 		set -e
@@ -241,7 +259,7 @@ while getopts 'a:b:d:i:k:m:p:r:t:hv' OPTION; do
 	case "$OPTION" in
 		a) ARCH="$OPTARG";;
 		b) ALPINE_BRANCH="$OPTARG";;
-		d) CHROOT_DIR="$OPTARG";;
+		d) ROOTFS="$OPTARG";;
 		i) BIND_DIR="$OPTARG";;
 		k) CHROOT_KEEP_VARS="${CHROOT_KEEP_VARS:-} $OPTARG";;
 		m) ALPINE_MIRROR="$OPTARG";;
@@ -258,7 +276,7 @@ done
 : ${ALPINE_PACKAGES:="build-base ca-certificates ssl_client"}
 : ${ARCH:=}
 : ${BIND_DIR:=}
-: ${CHROOT_DIR:="/alpine"}
+#: ${CHROOT_DIR:="$ROOTFS"}
 : ${CHROOT_KEEP_VARS:="ARCH CI QEMU_EMULATOR TRAVIS_.*"}
 : ${EXTRA_REPOS:=}
 : ${TEMP_DIR:=$(mktemp -d || echo /tmp/alpine)}
@@ -266,18 +284,24 @@ done
 # Note: Binding $PWD into chroot as default was a bad idea. It's convenient
 # on Travis, but dangerous in general. However, all existing .travis.yml relies
 # on this behaviour, so we can't (shouldn't) remove it completely.
-[ "$BIND_DIR" ] || case "$(pwd)" in
-	/home/*) BIND_DIR="$(pwd)";;
-esac
+
+# Ionoid.io we disable this
+#[ "$BIND_DIR" ] || case "$(pwd)" in
+#	/home/*) BIND_DIR="$(pwd)";;
+#esac
 
 
 if [ "$(id -u)" -ne 0 ]; then
 	die 'This script must be run as root!'
 fi
 
-mkdir -p "$CHROOT_DIR"
-cd "$CHROOT_DIR"
+if [ -z "$ROOTFS" ]; then
+	die 'ROOTFS where to build the app file system is not set!'
+fi
 
+einfo "Installing Alpine Linux $ALPINE_BRANCH 'arch=${ARCH}' into 'rootfs=${ROOTFS}'"
+
+mkdir -p "$ROOTFS"
 
 # Install QEMU user mode emulation if needed (works only on Debian and derivates)
 
@@ -300,82 +324,69 @@ if [ -n "$ARCH" ] && [ $(normalize_arch $ARCH) != $(normalize_arch $(uname -m)) 
 		install_binfmt_support
 	fi
 
-	mkdir -p usr/bin
-	cp -v "$QEMU_EMULATOR" usr/bin/
+        # Copy emulator if it is not there yet
+        if [ ! -f "${ROOTFS}/usr/bin/${QEMU_EMULATOR}" ]; then
+	        mkdir -p "${ROOTFS}/usr/bin"
+	        cp -v "$QEMU_EMULATOR" "${ROOTFS}/usr/bin/"
+        fi
 fi
 
 
 einfo 'Downloading static apk-tools'
 
+cdir=$(pwd)
 download_file "$APK_TOOLS_URI" "$APK_TOOLS_SHA256" "$TEMP_DIR"
 tar -C "$TEMP_DIR" -xzf "$TEMP_DIR/${APK_TOOLS_URI##*/}"
 mv "$TEMP_DIR"/apk-tools-*/apk "$TEMP_DIR"/
+cd $cdir
 
-
-einfo "Installing Alpine Linux $ALPINE_BRANCH ($ARCH) into chroot"
-
-mkdir -p "$CHROOT_DIR"/etc/apk
-cd "$CHROOT_DIR"
+mkdir -p "$ROOTFS"/etc/apk
 
 printf '%s\n' \
 	"$ALPINE_MIRROR/$ALPINE_BRANCH/main" \
 	"$ALPINE_MIRROR/$ALPINE_BRANCH/community" \
 	$EXTRA_REPOS \
-	> etc/apk/repositories
+	> $ROOTFS/etc/apk/repositories
 
-dump_alpine_keys etc/apk/keys/
+dump_alpine_keys $ROOTFS/etc/apk/keys/
 
-cp /etc/resolv.conf etc/resolv.conf
 
 "$TEMP_DIR"/apk \
-	--root . --update-cache --initdb --no-progress \
+	--root $ROOTFS --update-cache --initdb --no-progress \
 	${ARCH:+--arch $ARCH} \
 	add alpine-base
 
-gen_chroot_script > enter-chroot
-chmod +x enter-chroot
-
-
-einfo 'Binding filesystems into chroot'
-
-mount -v -t proc none proc
-mount -v --rbind /sys sys
-mount --make-rprivate sys
-mount -v --rbind /dev dev
-mount --make-rprivate dev
-
-# Some systems (Ubuntu?) symlinks /dev/shm to /run/shm.
-if [ -L /dev/shm ] && [ -d /run/shm ]; then
-	mkdir -p run/shm
-	mount -v --bind /run/shm run/shm
-	mount --make-private run/shm
-fi
-
-if [ "$BIND_DIR" ]; then
-	mkdir -p "${CHROOT_DIR}${BIND_DIR}"
-	mount -v --bind "$BIND_DIR" "${CHROOT_DIR}${BIND_DIR}"
-	mount --make-private "${CHROOT_DIR}${BIND_DIR}"
-fi
+alpine_setup_fs > $ROOTFS/usr/bin/alpine-setup-fs
+alpine_setup_chroot > $ROOTFS/usr/bin/alpine-chroot
+chmod +x $ROOTFS/usr/bin/alpine-setup-fs
+chmod +x $ROOTFS/usr/bin/alpine-chroot
 
 
 einfo 'Setting up Alpine'
 
-./enter-chroot <<-EOF
-	set -e
-	apk update
-	apk add $ALPINE_PACKAGES
+(
+        set -x
+        RUN alpine-setup-fs
+        RUN apk update
+        RUN apk add --no-cache bash
+)
 
-	if [ -d /etc/sudoers.d ] && [ ! -e /etc/sudoers.d/wheel ]; then
-		echo '%wheel ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/wheel
-	fi
+#$ROOTFS/usr/bin/alpine-chroot <<-EOF
+#	set -e
+#	apk update
+#EOF
 
-	if [ -n "${SUDO_USER:-}" ]; then
-		adduser -u "${SUDO_UID:-1000}" -G users -s /bin/sh -D "${SUDO_USER:-}" || true
-	fi
-EOF
 
-cat >&2 <<-EOF
-	---
-	Alpine installation is complete
-	Run $CHROOT_DIR/enter-chroot [-u <user>] [command] to enter the chroot.
-EOF
+# Lets cleanup file system now
+
+einfo "Cleaning up Alpine file system ${ROOTFS}"
+(
+        RUN apk update
+        RUN "rm -fr /var/cache/apk/*"
+        RUN "rm -fr /tmp/*"
+)
+
+finalize_etc_config $ROOTFS
+
+einfo "Cleaning up temp files: ${TEMP_DIR}"
+rm -fr "$TEMP_DIR"

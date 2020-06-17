@@ -1,0 +1,3 @@
+image=alpine
+mirror=https://nl.alpinelinux.org/alpine
+release=latest-stable

@@ -19,7 +19,7 @@ phases:
                         - ["apk", "update"]
                         - ["apk", "add", "--no-cache",
                         # "build-base",
-                           "ca-certificates", "ssl_client", "curl", "wget", "gnupg"]
+                           "ca-certificates", "ssl_client", "curl", "wget", "tar", "gnupg"]
                         - ["rm", "-rf", "/var/cache/apk/*" ]
                         - ["rm", "-rf", "/tmp/*" ]
                         - ["echo", "Installed alpine build base packages" ]

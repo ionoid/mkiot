@@ -18,6 +18,8 @@ phases:
                   cache: "reuse"
                   commands:
                         - ["/bin/bash", "-c", "echo Installed alpine mini ARCH=$ARCH"]
+                        - ["apk", "add", "ca-certificates", "ssl_client"]
+                        - ["apk", "add", "--no-cache", "curl", "tar", "gnupg"]
 
         builds:
                 # Set what image to use from installs

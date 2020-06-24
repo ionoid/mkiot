@@ -348,7 +348,36 @@ binaries](https://docs.ionoid.io/docs/iot-apps.html#golang-static-binaries).
 
 ### Alpine based file system
 
-To be added soon.
+[Alpine](https://alpinelinux.org/) is a security-oriented, lightweight Linux distribution based on musl libc and busybox.
+Using `mkiot` tools we can build Alpine based file system applications.
+
+* Minimal Alpine file system for `armhf`:
+```bash
+sudo mkiot build examples/alpine/buildspec-minimal-alpine-armhf.yaml
+```
+
+* Development Alpine with more development packages:
+
+TO BE ADDED
+
+
+#### Node.js based on Alpine
+
+* [Node.js
+package](https://nodejs.org/) from Alpine distribution with minimal packages:
+```bash
+sudo mkiot build examples/node.js/alpine/buildspec-node.js_minimal_alpine_armhf.yaml
+```
+
+* [Node.js
+package](https://nodejs.org/) from Alpine distribution with development packages:
+```bash
+sudo mkiot build examples/node.js/alpine/buildspec-node.js_build-base_alpine_armhf.yaml
+```
+
+* [Node-RED](https://nodered.org/) app example:
+Please follow this example: [build Node-RED](examples/apps/node-red) and deploy it to your devices.
+
 
 #### Golang based on Alpine
 

@@ -17,8 +17,11 @@ phases:
                         - ["/bin/bash", "-c", "echo Installed alpine mini ARCH=$arch"]
                         - ["cat", "/etc/os-release"]
                         - ["apk", "update"]
-                        - ["apk", "add", "--no-cache", "build-base",
-                           "ca-certificates", "ssl_client", "curl", "wget", "tar", "gnupg"]
+                        - ["apk", "add", "ca-certificates", "ssl_client"]
+                        - ["apk", "add", "--no-cache", "curl", "tar", "gnupg"]
+                        - ["apk", "add", "--no-cache", "--virtual", ".build-deps-full",
+                           "build-base", "gcc", "make", "g++", "python3", "linux-headers",
+                           "wget", "git"] 
                         - ["rm", "-rf", "/var/cache/apk/*" ]
                         - ["rm", "-rf", "/tmp/*" ]
                         - ["echo", "Installed alpine build base packages" ]

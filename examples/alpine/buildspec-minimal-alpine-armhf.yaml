@@ -19,5 +19,5 @@ phases:
 artifacts:
         - use: alpine-mini_armhf
           name: alpine-mini_armhf
-          suffix: date +%Y-%m-%d
+          suffix: date +%d-%m-%Y
           compression: tar.gz

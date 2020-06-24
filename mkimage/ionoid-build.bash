@@ -155,7 +155,7 @@ fi
 echo
 export IMAGES_CACHE=$(get_yaml_value "$BUILDSPEC" "cache.images | .[0]")
 if [ -z "$IMAGES_CACHE" ] || [ "$IMAGES_CACHE" == "null" ]; then
-        export IMAGES_CACHE="/var/lib/mkiot/images/cache/"
+        export IMAGES_CACHE="/var/cache/mkiot/images/"
         info "Cache for images not set, using: $IMAGES_CACHE"
 
         # Create anyway

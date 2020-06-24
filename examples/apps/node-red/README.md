@@ -5,11 +5,29 @@
 [Node-RED](https://nodered.org/) is a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways.
 
 
+## Node-RED Alpine Based Image
+
+To build Node-RED artifact based on Alpine for `ARM` architectures, use the following:
+
+- [Node-RED Buildspec yaml file](alpine/node-red_minimal_alpine_armhf.yaml)
+- [Node.js install script](alpine/node-install.sh)
+
+- [Node-RED app.yaml file](./app.yaml)
+
+
+Build example:
+
+```bash
+cd examples/apps/node-red/
+sudo mkiot build alpine/node-red_minimal_alpine_armhf.yaml
+```
+
+
 ## Node-RED Debian Based Image
 
 To build Node-RED for `ARM` architectures and produce an artifact, we use the following:
 
-- [Node-RED Buildspec yaml file](./debian/buster//node-red_node-14_minimal_debian_armhf.yaml)
+- [Node-RED Buildspec yaml file](./debian/buster/node-red_node-14_minimal_debian_armhf.yaml)
 - [Node.js install script](debian/buster/node-install.sh)
 
 - [Node-RED app.yaml file](./app.yaml)
@@ -30,16 +48,6 @@ node-red
 ```
 
 Then open your browser at [http://127.0.0.1:1880/](http://127.0.0.1:1880/)
-
-
-## Node-RED Alpine Based Image
-
-To build Node-RED artifact based on Alpine, make sure to be in this directory and start the build:
-
-```bash
-cd examples/apps/node-red/
-sudo mkiot build alpine/node-red_minimal_alpine_armhf.yaml
-```
 
 
 ## Deploy Node-RED to IoT Devices

@@ -166,10 +166,6 @@ EOF
         cd $cdir
 }
 
-zip_artifact() {
-        fatal "Zip not supported now it will be added soon, please use 'tar'"
-}
-
 tar_artifact() {
         local file="$1"
         local target="$2"

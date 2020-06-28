@@ -37,7 +37,7 @@ Pi](res/logos/Raspberry-pi-logo.png)](https://www.raspberrypi.org/)
 
 `mkiot` makes it easy to build IoT apps and artifacts for Linux IoT and Edge devices. Internally It uses `debootstrap` and other classic Linux tools. `mkiot` provides these benefits:
 
-* Produces classic archives format: `tar archive` files. Other formats like `zip` etc will be added soon.
+* Produces classic archives format: `tar archive` files, or supported compressed files over `tar`.
 
 * Supports multi-stage builds to optimize images and produce lightweight IoT apps.
 
@@ -57,7 +57,7 @@ make sure that the buildspec or the image urls inside it originated from a trust
 
 `mkiot` needs the following packages `qemu`, `qemu-user-static`, `binfmt-support`, `systemd-nspawn`, `deboostrap` and
 `python yq package and tool`. Of course it needs other tools that should be installed on standard Linux distributions:
-"python, bash, tar and zip"
+"python, bash, tar and gzip, etc.
 
 
 To install the necessary dependencies on `debian` or `ubuntu`:

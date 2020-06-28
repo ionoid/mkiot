@@ -152,6 +152,9 @@ if [ ! -f $QEMU_ARCH_INTERPRETER ]; then
         fatal "failed to find valid a $QEMU_ARCH_INTERPRETER interpreter for $ARCH"
 fi
 
+# TAR INCREMENTAL FILES CACHE
+TARIDX_CACHE="/var/cache/mkiot/taridx/"
+
 echo
 export IMAGES_CACHE=$(get_yaml_value "$BUILDSPEC" "cache.images | .[0]")
 if [ -z "$IMAGES_CACHE" ] || [ "$IMAGES_CACHE" == "null" ]; then
@@ -461,13 +464,8 @@ compress_artifact() {
         cdir=$(pwd)
         cd $dir
 
-        if [ "$compression" == "zip" ]; then
-                file="${file}.zip"
-                zip_artifact "$file" "$target"
-        else
-                file="${file}.${compression}"
-                tar_artifact "$file" "$target"
-        fi
+        file="${file}.${compression}"
+        tar_artifact "$file" "$target"
 
         # fix up permissions
         chown ${user}.${user} "${file}"

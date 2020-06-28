@@ -459,7 +459,12 @@ compress_artifact() {
 
         if [ -z "$compression" ] || [ "$compression" == "none" ]; then
                 compression="tar"
+        elif [ "$compression" == "tar.gz" ]; then
+                compression="tar.gz"
+        else
+                fatal "Generate artifact '$file' failed, compression '$compression' not supported"
         fi
+
 
         cdir=$(pwd)
         cd $dir

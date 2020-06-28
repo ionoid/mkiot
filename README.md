@@ -238,7 +238,8 @@ artifacts:
 
     * `files`: optional sequence of files and directories that are copied from the host file system into the final artifact. First element is the file or directory location on the host, and second element is where to copy the files or directories inside the artifact. This field can be used to copy an `app.yaml` file definition of an [IoT App](https://docs-dev.ionoid.io/docs/iot-apps.htm) inside the artifact to be deployed using [Ionoid.io](https://ionoid.io/).
 
-    * `compression`: specifies the archive and compression format to use, by default it uses the `tar archive` format.
+    * `compression`: specifies the archive and compression format to use, by default, if not set the procuded articact will be a `tar archive` file.
+    Supported compression formats: `tar.gz`
 
 
 ### Build spec commands documentation

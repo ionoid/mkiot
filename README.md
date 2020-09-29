@@ -107,19 +107,21 @@ The **mkiot** tool is a product maintained by <a href="https://ionoid.io/" targe
 
 ## Introduction
 
-`mkiot` makes it easy to build IoT apps and artifacts for Linux IoT and Edge devices. Internally It uses `debootstrap` and other classic Linux tools. `mkiot` provides these benefits:
+The `mkiot` tool makes it easy to build IoT apps and artifacts for Linux IoT and Edge devices. Internally It uses `debootstrap` and other classic Linux tools. `mkiot` provides these benefits:
 
-* Produces classic archives format: `tar archive` files, or supported compressed files over `tar`.
+- Produces classic archives format: `tar archive` files, or supported compressed files over `tar`
+- Supports multi-stage builds to optimize images and produce lightweight IoT apps
+- Only the build envrionment is defined, the execution environment is not defined nor enforced
+- Deploy produced artifcats to your IoT and Edge devices with [Ionoid.io](https://ionoid.io) using the [Deploy Apps](https://docs-dev.ionoid.io/docs/deploy-iot-apps.html#deploy-iot-apps) feature from [https://dashboard.ionoid.io/](Ionoid.io Dashboard).
 
-* Supports multi-stage builds to optimize images and produce lightweight IoT apps.
+> Security Note
+>
+> Do not run buildspec files nor use images from **untrusted parties**, this may harm your system. Always
+> make sure that the buildspec or the image urls inside it originated from a trusted source.
 
-* Only the build envrionment is defined, the execution environment is not defined nor enforced.
-
-* Deploy produced artifcats to your IoT and Edge devices with [Ionoid.io](https://ionoid.io) using [deploy Apps](https://docs-dev.ionoid.io/docs/deploy-iot-apps.html#deploy-iot-apps) from dashboard feature.
 
 
-Security note: do not run buildspec files nor use images from **untrusted parties**, this may harm your system. Always
-make sure that the buildspec or the image urls inside it originated from a trusted source.
+
 
 
 ## How to Install

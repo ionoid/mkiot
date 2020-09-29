@@ -164,9 +164,7 @@ sudo ./uninstall.bash
 ## The Build Spec Syntax
 
 The `mkiot` tool uses build specs that are expressed in [YAML](https://yaml.org)
-format to define how to build the application image.
-
-If a field contains a character that is not supported by YAML,
+format to define how to build the application image. If a field contains a character that is not supported by YAML,
 you must enclose the command in quotation marks ("").
 
 The buildspec format is:

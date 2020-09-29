@@ -167,7 +167,7 @@ The `mkiot` tool uses build specs that are expressed in [YAML](https://yaml.org)
 format to define how to build the application image. If a field contains a character that is not supported by YAML,
 you must enclose the command in quotation marks ("").
 
-The buildspec format is:
+The buildspec file structure looks like this:
 
 ```yaml
 version: 0.1
@@ -245,66 +245,38 @@ artifacts:
 
 ```
 
-* `version`: represents the buildspec version. Required field.
+Here is what each option means:
 
-* `arch`: required fields represents the target board architecture. Possible values are: `i386`, `amd64`, `armhf` and `arm64`.
-
-* `build-directory`: the location where to reproduce builds. If not set default location will be `mkiot-output` in the current directory.
-
-* `env`: optional field contains environment variables that are passed to all commands of the buildpsec. The environment variables are inside `variables` as keys and values.
-
-* `cache`: optional cache where to find previous images that were downloaded and cached. By default it is set to `/var/lib/mkiot/images/cache/`. Please do not set this unless you know what you are doing, in this case you have to cleanup the cache manually. Images inside the default cache folder `/var/lib/mkiot/images/cache/` that are older than 60 days will be removed next `mkiot` run.
-
-* `phases`: Represents the different phases of a build. This is a required field must contain the `installs` phase and at least one of the `pre-builds`, `builds` or `post-builds` phases.
-
-    * `installs`: a list of different images to install that are necessary to build and produce the application artifact. This should be used to only download images or use the ones from the cache to install packages.
-
-        * `image`: required field in `installs` contains the base distribution name to use as a file system for the application. Current supported values are [debian](https://www.debian.org/), and `scratch` for an empty Linux file system. For security reasons do not use untrusted sources or urls for your images, as `mkiot` runs will privileges this may harm your system, if you download or use images or buildspecs from untrusted parties.
-
-        * `mirror`: optional field to define the mirror where to download the distribution from.
-
-        * `release`: optional field to define the release code name of distribution to use.
-        
-        * `name`: required field to define how to name the directory that contains the downloaded distribtion or the one that was copied from cache.
-
-        * `cache`: optional field to specify how to use the cache. Possible values are `save`, `reuse` or both separated by `,`. Save means after finishing downloading this image and executing the commands save it into cache for future usage, overwriting any previous saved image that has same `name` field. Reuse means if this image is in the cache do not download it again and just copy it into the `build-directory` and use it.
-
-        * `commands`: optional sequence of commands with their arguments that are executed according to their order. Command example: `["/bin/echo", "hello"]`.
-
-    * `pre-builds`: optional sequence of commands to prepare the build environment.
-
-        * `use`: the name of the image to use. It has to be the `name` field of one of the images that were installed during the `installs` phase.
-
-        * `commands`: optional sequence of commands with their arguments that are executed according to their order. Command example: `["/bin/echo", "hello"]`.
-
-    * `builds`: optional sequence of commands to build the application.
-
-        * `use`: the name of the image to use. It has to be the `name` field of one of the images that were installed during the `installs` phase.
-
-        * `commands`: optional sequence of commands with their arguments that are executed according to their order. Command example: `["/bin/echo", "hello"]`.
-
-    * `post-builds`: optional sequence of commands to run after the build. These can be used to produce final files necesary to build the artifact, clean up files or even push notifications.
-
-        * `use`: the name of the image to use. It has to be the `name` field of one of the images that were installed during the `installs` phase.
-
-        * `commands`: optional sequence of commands with their arguments that are executed according to their order. Command example: `["/bin/echo", "hello"]`.
-
-
-* `artifacts`: required field that specifies how to produce the final artifacts. All produced artifacts can be found inside the `$build-directory/artifacts/` directory.
-
-    * `use`: the name of the image to use. It has to be the `name` field of one of the images that were installed during the `installs` phase.
-
-    * `name`: optional field that contains the name the final artifact. If not set it will use the same name of the field `use`.
-    
-    * `suffix`: optional field that will be appended to the name of the final artifact. This can be a bash command where the output is the `suffix`.
-
-    * `commands`: optional sequence of commands with their arguments that are executed according to their order. Command example: `["/bin/echo", "hello"]`. This can be used to copy files and directories into the final artifacts. As an example an `app.yaml` file that defines how to run the application.
-
-    * `files`: optional sequence of files and directories that are copied from the host file system into the final artifact. First element is the file or directory location on the host, and second element is where to copy the files or directories inside the artifact. This field can be used to copy an `app.yaml` file definition of an [IoT App](https://docs-dev.ionoid.io/docs/iot-apps.htm) inside the artifact to be deployed using [Ionoid.io](https://ionoid.io/).
-
-    * `compression`: specifies the archive and compression format to use, by default, if not set the procuded articact will be a `tar archive` file.
-    Supported compression formats: `tar.gz`
-
+* `version`: the buildspec version (Required).
+* `arch`: the target board architecture. Possible values are: `i386`, `amd64`, `armhf` and `arm64` (Required).
+* `build-directory`: the location where to reproduce builds. If not set default location will be `mkiot-output` in the current directory (Optional).
+* `env`: the environment variables that are passed to all commands of the buildpsec. The environment variables are inside `variables` as keys and values (Optional).
+* `cache`: the cache where to find previous images that were downloaded and cached. By default it is set to `/var/lib/mkiot/images/cache/`. Please do not set this unless you know what you are doing, in this case you have to cleanup the cache manually. Images inside the default cache folder `/var/lib/mkiot/images/cache/` that are older than 60 days will be removed at next `mkiot` run (Optional).
+* `phases`: the different phases of a build. This field must contain the `installs` phase and at least one of the `pre-builds`, `builds` or `post-builds` phases (Required).
+  * `installs`: a list of different images to install that are necessary to build and produce the application artifact. This should be used to only download images or use the ones from the cache to install packages.
+    * `image`: it contains the base distribution name to use as a file system for the application. Current supported values are [Debian](https://www.debian.org/), and `scratch` for an empty Linux file system. For security reasons do not use untrusted sources or URLs for your images, as `mkiot` runs will privileges this may harm your system, if you download or use images or buildspecs from untrusted parties (Required).
+      * `mirror`: it defines the mirror where to download the distribution from (Optional).
+      * `release`: it defines the release code name of distribution to use (Optional).
+      * `name`: it defines how to name the directory that contains the downloaded distribution or the one that was copied from cache (Required).
+      * `cache`: it specifies how to use the cache. Possible values are `save`, `reuse` or both separated by `,`. `save` means after finishing downloading this image and executing the commands save it into cache for future usage, overwriting any previous saved image that has same `name` field. `reuse` means if this image is in the cache do not download it again and just copy it into the `build-directory` and use it (Optional).
+      * `commands`: a sequence of commands with their arguments that are executed according to their order. For example `["/bin/echo", "hello"]` (Optional).
+    * `pre-builds`: a sequence of commands to prepare the build environment (Optional).
+      * `use`: the name of the image to use. It has to be the `name` field of one of the images that were installed during the `installs` phase.
+      * `commands`: optional sequence of commands with their arguments that are executed according to their order. For example `["/bin/echo", "hello"]`.
+    * `builds`: a sequence of commands to build the application (Optional).
+      * `use`: the name of the image to use. It has to be the `name` field of one of the images that were installed during the `installs` phase.
+      * `commands`: optional sequence of commands with their arguments that are executed according to their order. For example `["/bin/echo", "hello"]`.
+    * `post-builds`: a sequence of commands to run after the build. These can be used to produce final files necesary to build the artifact, clean up files or even push notifications (Optional).
+      * `use`: the name of the image to use. It has to be the `name` field of one of the images that were installed during the `installs` phase.
+      * `commands`: optional sequence of commands with their arguments that are executed according to their order. For example `["/bin/echo", "hello"]`.
+* `artifacts`: it specifies how to produce the final artifacts. All produced artifacts can be found inside the `$build-directory/artifacts/` directory (Required).
+  * `use`: the name of the image to use. It has to be the `name` field of one of the images that were installed during the `installs` phase (Required).
+  * `name`: it contains the name the final artifact. If not set it will use the same name of the field `use` (Optional).
+  * `suffix`: it will be appended to the name of the final artifact. This can be a bash command where the output is the `suffix` (Optional).
+  * `commands`: a sequence of commands with their arguments that are executed according to their order. For example: `["/bin/echo", "hello"]`. This can be used to copy files and directories into the final artifacts. As an example an `app.yaml` file that defines how to run the application (Optional).
+  * `files`: a sequence of files and directories that are copied from the host file system into the final artifact. First element is the file or directory location on the host, and second element is where to copy the files or directories inside the artifact. This field can be used to copy an `app.yaml` file definition of an [IoT App](https://docs-dev.ionoid.io/docs/iot-apps.htm) inside the artifact to be deployed using [Ionoid.io](https://ionoid.io/) (Optional).
+  * `compression`: specifies the archive and compression format to use, by default, if not set the procuded articact will be a `tar archive` file.
+    Supported compression formats: `tar.gz` (Optional).
 
 ### The Build Spec Commands Documentation
 

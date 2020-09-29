@@ -346,17 +346,18 @@ Possible values of `arch` inside buildspec files are: `i386`, `amd64`, `armhf` a
 
 ### Debian Based Images
 
-[Debian](https://www.debian.org/) is a free operation system (OS) for PC. Using `mkiot` tools we can build a minimal Debian
+[Debian](https://www.debian.org/) is a free operation system for PC. Using `mkiot` tools we can build a minimal Debian
 based file system for applications without a Linux kernel nor other tools needed to run a complete OS. `mkiot` makes use
 of [debootstrap](https://wiki.debian.org/Debootstrap) to install the system.
 
-
 * Minimal Debian file system:
+
 ```bash
 sudo mkiot build examples/debian/buildspec.yaml
 ```
 
 * Development Debian with build essential packages:
+
 ```bash
 sudo mkiot build examples/devtools/debian/buster/buildspec-devtools-armhf.yaml
 ```
@@ -365,36 +366,40 @@ sudo mkiot build examples/devtools/debian/buster/buildspec-devtools-armhf.yaml
 
 * [Node.js
 package](https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions-enterprise-linux-fedora-and-snap-packages) from usptream with minimal debian:
+
 ```bash
 sudo mkiot build examples/node.js/debian/buster/buildspec-node.js-minimal-debian-armhf.yaml
 ```
 
 * Node.js binary from upstream with extra `devtools`, `build essential` and `yarn` installed:
+
 ```bash
 sudo mkiot build examples/node.js/14/buster/buildspec-node.js-devtools-debian-armv7l.yaml
 ```
 
 * [Node-RED](https://nodered.org/) app example:
-Please follow this example: [build Node-RED](examples/apps/node-red) and deploy it to your devices.
 
+Please follow this example: [build Node-RED](examples/apps/node-red) and deploy it to your devices.
 
 #### Python based on Debian
 
 * Python2 on minimal Debian with some development packages:
+
 ```bash
 sudo mkiot build examples/python/debian/buster/buildspec-python2-minimal-debian-armhf.yaml
 ```
 
 * Python3 with minimal file system:
+
 ```bash
 sudo mkiot build examples/python/debian/buster/buildspec-python3-minimal-debian-armhf.yaml
 ```
 
 * Python3 with extra devtools file system:
+
 ```bash
 sudo mkiot build examples/python/debian/buster/buildspec-python3-devtools-debian-armhf.yaml
 ```
-
 
 #### Golang based on Debian
 
@@ -405,36 +410,39 @@ produce binaries that you copy to the final artifact.
 More resources on how to produce [Golang static
 binaries](https://docs.ionoid.io/docs/iot-apps.html#golang-static-binaries).
 
-
 ### Alpine Based File System
 
 [Alpine](https://alpinelinux.org/) is a security-oriented, lightweight Linux distribution based on musl libc and busybox.
 Using `mkiot` tools we can build Alpine based file system applications.
 
-* Minimal Alpine file system for `armhf`:
+- Minimal Alpine file system for `armhf`:
+
 ```bash
 sudo mkiot build examples/alpine/buildspec-minimal-alpine-armhf.yaml
 ```
 
-* Development Alpine with more development packages:
+- Development Alpine with more development packages:
 
-TO BE ADDED
+*To be added soon*.
 
 #### Node.js based on Alpine
 
-* [Node.js
+- [Node.js
 package](https://nodejs.org/) from Alpine distribution with minimal packages:
+
 ```bash
 sudo mkiot build examples/node.js/alpine/buildspec-node.js_minimal_alpine_armhf.yaml
 ```
 
-* [Node.js
+- [Node.js
 package](https://nodejs.org/) from Alpine distribution with development packages:
+
 ```bash
 sudo mkiot build examples/node.js/alpine/buildspec-node.js_build-base_alpine_armhf.yaml
 ```
 
-* [Node-RED](https://nodered.org/) app example:
+- [Node-RED](https://nodered.org/) app example:
+
 Please follow this example: [build Node-RED](examples/apps/node-red) and deploy it to your devices.
 
 
@@ -447,19 +455,17 @@ produce binaries that you copy to the final artifact.
 More resources on how to produce [Golang static
 binaries](https://docs.ionoid.io/docs/iot-apps.html#golang-static-binaries).
 
-
 ### Scratch File System
 
 Scratch based file system contains empty directories parts of the [Filesystem Hierarchy
 Standard](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard). The directories are empty on purpose, which
 allows to build images on top.
 
-* Scratch file system example:
+- Scratch file system example:
 
 ```bash
 sudo mkiot build examples/scratch/buildspec.yaml
 ```
-
 
 ## Multi-Stage Builds
 
@@ -481,6 +487,7 @@ and directories between different images during all phases of the build process,
 correct.
 
 Example of copying files between images:
+
 ```yaml
 version: 0.1
 
@@ -488,77 +495,76 @@ arch: armhf
 build-directory: output/
 
 env:
-        variables:
-                key: "value"
-                arch: "armhf"
+	variables:
+    key: "value"
+    arch: "armhf"
 
 phases:
-        installs:
-                # Download minimal debian image and name it
-                # `debian-armhf-development`
-                - image: debian
-                  mirror: http://deb.debian.org/debian/
-                  release: buster
-                  name: debian-armhf-development
-                  cache: "reuse"
-                  commands:
-                        - ["/bin/bash", "-c", "echo Installed debian buster arch $arch"]
-                        - ["cat", "/etc/os-release"]
-                        - ["echo", "OS release file output above"]
+  installs:
+    # Download minimal debian image and name it
+    # `debian-armhf-development`
+    - image: debian
+      mirror: http://deb.debian.org/debian/
+      release: buster
+      name: debian-armhf-development
+      cache: "reuse"
+      commands:
+        - ["/bin/bash", "-c", "echo Installed debian buster arch $arch"]
+        - ["cat", "/etc/os-release"]
+        - ["echo", "OS release file output above"]
 
-                # Download a secondary minimal debian image and name it
-                # `debian-armhf-production`
-                - image: debian
-                  mirror: http://deb.debian.org/debian/
-                  release: buster
-                  name: debian-armhf-production
+    # Download a secondary minimal debian image and name it
+    # `debian-armhf-production`
+    - image: debian
+      mirror: http://deb.debian.org/debian/
+      release: buster
+      name: debian-armhf-production
 
-        # Build stages now
-        builds:
-                # Use debian-armhf-development image to build application
-                - use: debian-armhf-development
-                  commands:
-                        # Install extra dependecies
-                        - ["apt", "install", "-y", "$dependencies" ]
+  # Build stages now
+  builds:
+    # Use debian-armhf-development image to build application
+    - use: debian-armhf-development
+      commands:
+        # Install extra dependecies
+        - ["apt", "install", "-y", "$dependencies" ]
 
-                        # Copy `config` file from local host file system into image
-                        # named `debian-armhf-development` in /etc/ directory
-                        - ["copy", "myapp/config", "/etc/config"]
+        # Copy `config` file from local host file system into image
+        # named `debian-armhf-development` in /etc/ directory
+        - ["copy", "myapp/config", "/etc/config"]
 
-                        # Build myapp
-                        - ["build-myapp" ]
-
-
-                # Use debian-armhf-production image as target
-                - use: debian-armhf-production
-                  commands:
-                        # copy from image name `debian-armhf-development` file
-                        # `/etc/config` into current in use image which is
-                        # `debian-armhf-production` using same file location
-                        - ["copy", "--from=debian-armhf-development", "/etc/config", "/etc/config"]
+        # Build myapp
+        - ["build-myapp" ]
 
 
-        post-builds:
-                - use: debian-armhf-production
-                  commands:
-                        # See content of file copied from another image
-                        - ["cat", "/etc/config"]
-                        - ["echo", "Build production finished"]
+    # Use debian-armhf-production image as target
+    - use: debian-armhf-production
+      commands:
+        # copy from image name `debian-armhf-development` file
+        # `/etc/config` into current in use image which is
+        # `debian-armhf-production` using same file location
+        - ["copy", "--from=debian-armhf-development", "/etc/config", "/etc/config"]
+
+
+  post-builds:
+    - use: debian-armhf-production
+      commands:
+        # See content of file copied from another image
+        - ["cat", "/etc/config"]
+        - ["echo", "Build production finished"]
 
 artifacts:
-        # Use the image named `debian-armhf-production` as base image for the final artifact
-        - use: debian-armhf-production
+  # Use the image named `debian-armhf-production` as base image for the final artifact
+  - use: debian-armhf-production
 
-          # Name of final artifact
-          name: debian-buster-armhf
+    # Name of final artifact
+    name: debian-buster-armhf
 
-          # Files to copy to artifact
-          files:
-             - app.yaml  /app.yaml
-             - myapp     /usr/bin/myapp
+    # Files to copy to artifact
+    files:
+      - app.yaml  /app.yaml
+      - myapp     /usr/bin/myapp
 
-          # suffix artifact name with current date yy-mm-day
-          suffix: date +%Y-%m-%d
-          compression: tar
-
+    # suffix artifact name with current date yy-mm-day
+    suffix: date +%Y-%m-%d
+    compression: tar
 ```

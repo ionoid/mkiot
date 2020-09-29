@@ -84,18 +84,13 @@ The **mkiot** tool is a product maintained by <a href="https://ionoid.io/" targe
 	</table>
 </div>
 
-## Index:
+## Index
 
 - [Introduction](#introduction)
-
 - [Install](#install)
-
 - [Build spec syntax](#build-spec-syntax)
-
 - [Examples](#examples)
-
 - [Multi-stage builds](#multi-stage-builds)
-
 
 ## Introduction
 

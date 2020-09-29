@@ -495,7 +495,7 @@ arch: armhf
 build-directory: output/
 
 env:
-	variables:
+  variables:
     key: "value"
     arch: "armhf"
 

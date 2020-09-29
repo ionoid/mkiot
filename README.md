@@ -21,9 +21,13 @@
 
 <h1 align="center">Make IoT - Build Linux IoT and Edge Apps</h1>
 
-`mkiot` build IoT apps artifacts for Linux IoT and Edge devices.
+<div align="center">
+	
+The **mkiot** tool build IoT apps artifacts for Linux IoT and Edge devices.
 
-`mkiot` is a product maintained by [Ionoid.io](https://ionoid.io/) - IoT next generation deployment.
+The **mkiot** tool is a product maintained by <a href="https://ionoid.io/" targe="_blank">Ionoid.io</a> - The IoT next generation deployment.
+	
+</div>
 
 <h1 align="center">Images and Environments</h1>
 

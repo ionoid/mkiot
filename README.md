@@ -129,23 +129,22 @@ The `mkiot` tool makes it easy to build IoT apps and artifacts for Linux IoT and
 
 ### Prepare Dependencies
 
-`mkiot` needs the following packages `qemu`, `qemu-user-static`, `binfmt-support`, `systemd-nspawn`, `deboostrap` and
-`python yq package and tool`. Of course it needs other tools that should be installed on standard Linux distributions:
-"python, bash, tar and gzip, etc.
+The `mkiot` tool needs the following packages: `qemu`, `qemu-user-static`, `binfmt-support`, `systemd-nspawn`, `deboostrap`,
+`yq` and `pyyaml`.
 
+Of course it also needs other tools that should already be installed on standard Linux distributions like
+`python`, `bash`, `tar` or `gzip`.
 
-To install the necessary dependencies on `debian` or `ubuntu`:
+To install the necessary dependencies on Debian based operating systems:
 
 ```bash
-   sudo apt-get install qemu qemu-user-static binfmt-support systemd-container debootstrap
+sudo apt-get install qemu qemu-user-static binfmt-support systemd-container debootstrap
 ```
 
+and:
 
-- Install Python packages:
-    - yq: Command-line YAML/XML processor. [yq Link](https://kislyuk.github.io/yq/).
-    - pyyaml: PyYAML is a YAML parser and emitter for Python. [PyYaml Link](https://github.com/yaml/pyyaml).
 ```bash
-        sudo pip install -U yq pyyaml
+sudo pip install -U yq pyyaml
 ```
 
 ### Install Make IoT

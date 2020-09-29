@@ -178,7 +178,7 @@ arch: armhf
 build-directory: build/
 
 env:
-	variables:
+  variables:
     key: "value"
     key1: "value"
 

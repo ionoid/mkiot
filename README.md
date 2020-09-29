@@ -1,9 +1,20 @@
 <div align="center">
 	<img style="width:100%;" src="mkiot-logo.png" alt="ionoid.io mkiot">
-	<br>
 	<h4>
-		Building IoT Apps Made Easy - The <a href="https://ionoid.io">Ionoid.io</a> Make IoT Tool
+		Building IoT Apps Made Easy - The <a href="https://ionoid.io/" target="_blank">Ionoid.io</a> Make IoT Tool
 	</h4>
+	<p align="center">
+		<br />
+		<a href="https://ionoid.io/">Website</a>
+		·
+		<a href="https://docs.ionoid.io/">Documentation</a>
+		·
+		<a href="https://dashboard.ionoid.io/">Dashboard</a>
+	</p>
+	<p align="center">
+		<sub>Copyright <a href="https://www.opendevices.io/" target="_blank">Open Devices GmbH ©</a> 2020 All Rights Reserved</sub>
+	</p>
+
 </div>
 
 # Make IoT - Build Linux IoT and Edge Apps

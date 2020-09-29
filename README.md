@@ -50,6 +50,11 @@ The **mkiot** tool is a product maintained by <a href="https://ionoid.io/" targe
 				</a>
 			</td>
   		</tr>
+		<tr>
+			<td align="center">Debian</td>
+			<td align="center">Alpine Linux</td>
+			<td align="center">Ubuntu</td>
+		</tr>
   		<tr>
     			<td>
 				<a href="https://www.raspberrypi.org/" target="_blank">
@@ -67,6 +72,11 @@ The **mkiot** tool is a product maintained by <a href="https://ionoid.io/" targe
 				</a>
 			</td>
   		</tr>
+		<tr>
+			<td align="center">Raspberry Pi</td>
+			<td align="center">Node.js</td>
+			<td align="center">Python</td>
+		</tr>
 	</table>
 </div>
 
@@ -77,10 +87,13 @@ The **mkiot** tool is a product maintained by <a href="https://ionoid.io/" targe
 		<tr>
 			<td>
 				<a href="https://nodered.org/" target="_blank">
-					<img src="logos/node-red-logo.png" style="" alt="Node red" title="Node red" />
+					<img src="logos/node-red-logo.png" style="" alt="Node red" title="Node-RED" />
 				</a>
 			</td>
   		</tr>
+		<tr>
+			<td align="center">Node-RED</td>
+		</tr>
 	</table>
 </div>
 

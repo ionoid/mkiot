@@ -153,7 +153,6 @@ cd mkiot
 To install run the following command:
 
 ```bash
-cd mkiot
 sudo ./install.bash
 ```
 
@@ -164,13 +163,13 @@ sudo ./uninstall.bash
 
 ## The Build Spec Syntax
 
-`mkiot` uses build specs that are expressed in [YAML](https://yaml.org) format to define how to build the application
-image.
+The `mkiot` tool uses build specs that are expressed in [YAML](https://yaml.org)
+format to define how to build the application image.
 
-If a field contains a character, or a string of characters, that is not supported by YAML,
+If a field contains a character that is not supported by YAML,
 you must enclose the command in quotation marks ("").
 
-Buildspec format:
+The buildspec format is:
 
 ```yaml
 version: 0.1
@@ -179,76 +178,74 @@ arch: armhf
 build-directory: build/
 
 env:
-        variables:
-                key: "value"
-                key1: "value"
+	variables:
+    key: "value"
+    key1: "value"
 
 cache:
-        images:
-                - /var/lib/mkiot/images/cache/
+  images:
+    - /var/lib/mkiot/images/cache/
 
 phases:
-        installs:
-                - image: debian
-                  mirror: http://deb.debian.org/debian/
-                  release: buster
-                  name: debian-armhf-dev
-                  cache: "save,reuse"
-                  install-args:
-                  runtime-versions:
-                  commands:
-                        - ["command"]
-                        - ["command", "arg1", "arg2" ]
+  installs:
+    - image: debian
+      mirror: http://deb.debian.org/debian/
+      release: buster
+      name: debian-armhf-dev
+      cache: "save,reuse"
+      install-args:
+      runtime-versions:
+      commands:
+        - ["command"]
+        - ["command", "arg1", "arg2" ]
 
-                - image: debian
-                  name: debian-armhf-prod
-                  cache: "reuse"
-                  install-args:
-                  shell: "bash"
+    - image: debian
+      name: debian-armhf-prod
+      cache: "reuse"
+      install-args:
+      shell: "bash"
 
+  pre-builds:
+    # Set what image to use from installs
+    - use: debian-armhf-dev
+      commands:
+        - ["command"]
+        - ["script", "scriptfile", "/bin/scriptfile"]
 
-        pre-builds:
-                # Set what image to use from installs
-                - use: debian-armhf-dev
-                  commands:
-                        - ["command"]
-                        - ["script", "scriptfile", "/bin/scriptfile"]
+  builds:
+    # Set what image to use from installs
+    - use: debian-armhf-dev
+      commands:
+        - ["command_1"]
+        - ["command_2"]
+        - ["command_3"]
 
-        builds:
-                # Set what image to use from installs
-                - use: debian-armhf-dev
-                  commands:
-                        - ["command"]
-                        - ["command"]
-                        - ["command"]
+    # Use debian-armhf-prod image as target
+    - use: debian-armhf-prod
+      commands:
+        # copy from dev image to prod image
+        - ["copy", "--from=debian-armhf-dev", "source_file", "destination_file" ]
+        - ["command"]
 
-                # Use debian-armhf-prod image as target
-                - use: debian-armhf-prod
-                  commands:
-                        # copy from dev image to prod image
-                        - ["copy", "--from=debian-armhf-dev", "source_file", "destination_file" ]
-                        - ["command"]
-
-        post-builds:
-                - use: debian-armhf-prod
-                  commands:
-                        - ["command"]
-                        - ["command"]
-                        - ["command"]
+  post-builds:
+    - use: debian-armhf-prod
+      commands:
+        - ["command_1"]
+        - ["command_2"]
+        - ["command_3"]
 
 artifacts:
-        - use: debian-armhf-prod
-          name: debian-stretch-armhf
-          suffix: date +%Y-%m-%d
-          commands:
-                - ["copy", "app.yaml", "app.yaml" ]
-          files:
-                - app.yaml app.yaml
-                - file.conf /etc/file.conf
-          compression: tar
+  - use: debian-armhf-prod
+    name: debian-stretch-armhf
+    suffix: date +%Y-%m-%d
+    commands:
+      - ["copy", "app.yaml", "app.yaml" ]
+    files:
+      - app.yaml app.yaml
+      - file.conf /etc/file.conf
+    compression: tar
 
 ```
-
 
 * `version`: represents the buildspec version. Required field.
 

@@ -109,10 +109,10 @@ Security note: do not run buildspec files nor use images from **untrusted partie
 make sure that the buildspec or the image urls inside it originated from a trusted source.
 
 
-## Install
+## How to Install
 
 
-### Dependencies
+### Prepare Dependencies
 
 `mkiot` needs the following packages `qemu`, `qemu-user-static`, `binfmt-support`, `systemd-nspawn`, `deboostrap` and
 `python yq package and tool`. Of course it needs other tools that should be installed on standard Linux distributions:
@@ -133,6 +133,7 @@ To install the necessary dependencies on `debian` or `ubuntu`:
         sudo pip install -U yq pyyaml
 ```
 
+### Install Make IoT
 
 After clone the current `mkiot` repository:
 
@@ -152,7 +153,7 @@ sudo ./uninstall.bash
 ```
 
 
-## Build Spec syntax
+## The Build Spec Syntax
 
 `mkiot` uses build specs that are expressed in [YAML](https://yaml.org) format to define how to build the application
 image.
@@ -301,7 +302,7 @@ artifacts:
     Supported compression formats: `tar.gz`
 
 
-### Build spec commands documentation
+### The Build Spec Commands Documentation
 
 Commands are sequences that are executed inside the image or the build environment one at a time, in the order listed.
 Each command can be any command that refers to a binary or shell command inside the image, beside that there are some
@@ -335,7 +336,7 @@ During other build stages, commands are executed inside the image environment th
         * `"destination"`: specifies the destination inside the image environment where to copy the files or directories.
 
 
-## Examples
+## Some Examples
 
 The following examples demonstrate how to build an IoT package for Linux. The package includes the application with all its
 dependencies inside a `tar archive` file. There are multiple Linux distributions that can be used as a base file system
@@ -344,7 +345,7 @@ for applications, the next section details this more.
 Possible values of `arch` inside buildspec files are: `i386`, `amd64`, `armhf` and `arm64`.
 
 
-### Debian based images
+### Debian Based Images
 
 [Debian](https://www.debian.org/) is a free operation system (OS) for PC. Using `mkiot` tools we can build a minimal Debian
 based file system for applications without a Linux kernel nor other tools needed to run a complete OS. `mkiot` makes use
@@ -406,7 +407,7 @@ More resources on how to produce [Golang static
 binaries](https://docs.ionoid.io/docs/iot-apps.html#golang-static-binaries).
 
 
-### Alpine based file system
+### Alpine Based File System
 
 [Alpine](https://alpinelinux.org/) is a security-oriented, lightweight Linux distribution based on musl libc and busybox.
 Using `mkiot` tools we can build Alpine based file system applications.
@@ -419,7 +420,6 @@ sudo mkiot build examples/alpine/buildspec-minimal-alpine-armhf.yaml
 * Development Alpine with more development packages:
 
 TO BE ADDED
-
 
 #### Node.js based on Alpine
 
@@ -449,7 +449,7 @@ More resources on how to produce [Golang static
 binaries](https://docs.ionoid.io/docs/iot-apps.html#golang-static-binaries).
 
 
-### Scratch file system
+### Scratch File System
 
 Scratch based file system contains empty directories parts of the [Filesystem Hierarchy
 Standard](https://en.wikipedia.org/wiki/Filesystem_Hierarchy_Standard). The directories are empty on purpose, which
@@ -462,7 +462,7 @@ sudo mkiot build examples/scratch/buildspec.yaml
 ```
 
 
-## Multi-stage builds
+## Multi-Stage Builds
 
 One of the main issues of IoT and Edge devices is storage size, deploying artifacts and images that contain the full
 build environment with multiple libraries and packages that are necessary to build the application but not to run it,

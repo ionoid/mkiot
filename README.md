@@ -119,13 +119,7 @@ The `mkiot` tool makes it easy to build IoT apps and artifacts for Linux IoT and
 > Do not run buildspec files nor use images from **untrusted parties**, this may harm your system. Always
 > make sure that the buildspec or the image urls inside it originated from a trusted source.
 
-
-
-
-
-
 ## How to Install
-
 
 ### Prepare Dependencies
 
@@ -133,7 +127,7 @@ The `mkiot` tool needs the following packages: `qemu`, `qemu-user-static`, `binf
 `yq` and `pyyaml`.
 
 Of course it also needs other tools that should already be installed on standard Linux distributions like
-`python`, `bash`, `tar` or `gzip`.
+`python`, `bash`, `tar`, `gzip`, etc...
 
 To install the necessary dependencies on Debian based operating systems:
 
@@ -149,23 +143,24 @@ sudo pip install -U yq pyyaml
 
 ### Install Make IoT
 
-After clone the current `mkiot` repository:
+Start by cloning the current repository:
 
 ```bash
 git clone https://github.com/ionoid/mkiot.git
+cd mkiot
 ```
 
-Install:
+To install run the following command:
+
 ```bash
 cd mkiot
 sudo ./install.bash
 ```
 
-To uninstall:
+If you want to uninstall, run:
 ```bash
 sudo ./uninstall.bash
 ```
-
 
 ## The Build Spec Syntax
 

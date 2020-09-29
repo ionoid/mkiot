@@ -29,7 +29,7 @@ The **mkiot** tool is a product maintained by <a href="https://ionoid.io/" targe
 	
 </div>
 
-<h1 align="center">Images and Environments</h1>
+<h1 align="center">Supported Images and Environments</h1>
 
 <div align="center">
 	<table>
@@ -70,10 +70,19 @@ The **mkiot** tool is a product maintained by <a href="https://ionoid.io/" targe
 	</table>
 </div>
 
-<h1 align="center">Apps</h1>
+<h1 align="center">Supported Apps</h1>
 
-[![Node-RED](res/logos/node-red-logo.png)](https://nodered.org)
-
+<div align="center">
+	<table>
+		<tr>
+			<td>
+				<a href="https://nodered.org/" target="_blank">
+					<img src="logos/node-red-logo.png" style="" alt="Node red" title="Node red" />
+				</a>
+			</td>
+  		</tr>
+	</table>
+</div>
 
 ## Index:
 

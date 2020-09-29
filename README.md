@@ -309,35 +309,31 @@ Here is what each option means:
 
 Commands are sequences that are executed inside the image or the build environment one at a time, in the order listed.
 Each command can be any command that refers to a binary or shell command inside the image, beside that there are some
-special commands that will make it easy to automate the build process
+special commands that will make it easy to automate the build process.
 
 During the `installs` phase, commands are executed inside the image environment that was named by the `name` field.
 During other build stages, commands are executed inside the image environment that was specified by the `use` field.
 
-
 * `script`: the script command allows to pass directly a script inside the image and execute it, it is done by bind mounting the script inside the image. This is useful instead of passing multiple sequences of commands; the commands are inside the script file which is executed. The script can be either `bash`, `python` etc. Please note that the script will not be copied inside the image.
 
-    * `script` syntax: the `script` command syntax is: `[ "script", "scriptfile", "/bin/scriptfile" ]`
-    
-        * `"script"`: first element is the command `script`.
-        
-        * `"scriptfile"`: the second element is the script file location on the host file system. This can be located inside the same directory where the current `buildspec.yaml` file is.
-        
-        * `"/bin/scriptfile"`: last element is optional. Specify where to make the script available inside the image. Usually using `/bin/` inside image is enough which is the default operation anyway if the third element is not specified.
+The `script` command syntax is `[ "script", "scriptfile", "/bin/scriptfile" ]` where:
 
+| Element       	| Meaning		  |
+| ---------------------	|:------------------------|
+| `script`    	| the command 		  |
+| `scriptfile`     	| the script file location on the host file system. This can be located inside the same directory where the current `buildspec.yaml` file is |
+| `/bin/scriptfile` 	| Specify where to make the script available inside the image. Usually using `/bin/` inside image is enough which is the default operation anyway if the third element is not specified (*Optional*) |
 
 * `copy`: the copy command allows to copy files and directories between multiple images and local file system. Internally it invokes the Unix `cp` command with `-a` as argument so directories are copied recursively with permissions preserved if possible. For further details please read [cp manual](https://linux.die.net/man/1/cp).
 
-    * `copy` syntax: the `copy` command syntax is: `["copy", "--from=image-name", "source", "destination" ]
+The `copy` command syntax is `["copy", "--from=image-name", "source", "destination" ]` where:
 
-        * `"copy"`: first element is the command.
-
-        * `"--from=image-name"`: second element is optional and allows to copy files and directories from other images and build envrionments to perform multi-stage builds. The `image-name` must be a `name` field of one of the images that were installed during the `installs` phase.
-
-        * `"source"`: specifies the source files or directories to be copied from host or another image into the target image name that was specified inside the `use` field.
-
-        * `"destination"`: specifies the destination inside the image environment where to copy the files or directories.
-
+| Element       	| Meaning		  |
+| ---------------------	|:------------------------|
+| `copy`    		| the command |
+| `--from=` | it allows to copy files and directories from other images and build envrionments to perform multi-stage builds. The `image-name` must be a `name` field of one of the images that were installed during the `installs` phase (*Optional*) |
+| `source` 		| it specifies the source files or directories to be copied from host or another image into the target image name that was specified inside the `use` field |
+| `destination` 	| it specifies the destination inside the image environment where to copy the files or directories |
 
 ## Some Examples
 

@@ -17,14 +17,14 @@
 
 </div>
 
-# Make IoT - Build Linux IoT and Edge Apps
+<h1 align="center">Make IoT - Build Linux IoT and Edge Apps</h1>
 
 `mkiot` build IoT apps artifacts for Linux IoT and Edge devices.
 
 `mkiot` is a product maintained by [Ionoid.io](https://ionoid.io/) - IoT next generation deployment.
 
+<h1 align="center">Images and Environments</h1>
 
-## Images and Environments
 <div align="center">
 	<table>
 		<tr>
@@ -64,7 +64,7 @@
 	</table>
 </div>
 
-## Apps
+<h1 align="center">Apps</h1>
 
 [![Node-RED](res/logos/node-red-logo.png)](https://nodered.org)
 

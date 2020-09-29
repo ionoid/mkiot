@@ -25,14 +25,44 @@
 
 
 ## Images and Environments
-
-[![Debian](res/logos/debian-logo.jpg)](https://www.debian.org)    [![Alpine
-Linux](res/logos/alpine-logo.png)](https://alpinelinux.org/)
-[![Ubuntu](res/logos/ubuntu-logo.png)](https://ubuntu.com/)    [![Raspberry
-Pi](res/logos/Raspberry-pi-logo.png)](https://www.raspberrypi.org/)
-
-[![Node.js](res/logos/Node.js_logo.svg.png)](https://nodejs.org/en/)    [![Python](res/logos/python-logo.png)](https://www.python.org/)
-
+<div align="center">
+	<table>
+		<tr>
+			<td>
+				<a href="https://www.debian.org/" target="_blank">
+					<img src="logos/debian-logo.png" style="" alt="Debian" title="Debian" />
+				</a>
+			</td>
+    			<td>
+				<a href="https://alpinelinux.org/" target="_blank">
+					<img src="logos/alpine-linux-logo.png" style="" alt="Alpine Linux" title="Alpine Linux" />
+				</a>
+			</td>
+    			<td>
+				<a href="https://ubuntu.com/" target="_blank">
+					<img src="logos/ubuntu-logo.png" style="" alt="Ubuntu" title="Ubuntu" />
+				</a>
+			</td>
+  		</tr>
+  		<tr>
+    			<td>
+				<a href="https://www.raspberrypi.org/" target="_blank">
+					<img src="logos/raspberry-logo.png" style="" alt="Raspberry Pi" title="Raspberry Pi" />
+				</a>
+			</td>
+    			<td>
+				<a href="https://nodejs.org/en/" target="_blank">
+					<img src="logos/nodejs-logo.png" style="" alt="Node.js" title="Node.js" />
+				</a>
+			</td>
+    			<td>
+				<a href="https://www.python.org/" target="_blank">
+					<img src="logos/python-logo.png" style="" alt="Python" title="Python" />
+				</a>
+			</td>
+  		</tr>
+	</table>
+</div>
 
 ## Apps
 
